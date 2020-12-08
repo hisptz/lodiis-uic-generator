@@ -1,0 +1,22 @@
+{
+  "name": "uic-generator",
+  "version": "1.0.0",
+  "description": "Script for generating Primary and secondary UIC",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hisptz/uic-generator.git"
+  },
+  "keywords": [
+    "uic2"
+  ],
+  "author": "HISPTZ",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hisptz/uic-generator/issues"
+  },
+  "homepage": "https://github.com/hisptz/uic-generator#readme"
+}
