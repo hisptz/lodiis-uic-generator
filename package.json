@@ -20,8 +20,11 @@
   },
   "homepage": "https://github.com/hisptz/uic-generator#readme",
   "dependencies": {
+    "fs": "0.0.1-security",
     "lodash": "^4.17.20",
+    "moment": "^2.29.1",
     "promise": "^8.1.0",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "shelljs": "^0.8.4"
   }
 }
