@@ -7,9 +7,8 @@ async function getOrgUnitsForDataProcessing(headers, serverUrl, level) {
       level
     );
     return communityCouncils;
-  } catch (e) {
-    console.log({e});
-   await logsHelper.addLogs('ERROR', JSON.stringify(error), 'App');
+  } catch (error) {
+   await logsHelper.addLogs('ERROR', JSON.stringify(error), 'getOrgUnitsForDataProcessing');
   }
 }
 module.exports = {

@@ -2,6 +2,7 @@ const dhis2Util = require('../helpers/dhis2-util.helper');
 const config = require('../config');
 const serverUrl = config.sourceConfig.url;
 const dataExtractor = require('./data-extractor');
+const dataProcessor = require('./data-processor');
 const constantsHelper = require('../helpers/constants.helper');
 const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
 async function startApp() {
@@ -17,11 +18,19 @@ async function startApp() {
       levelForDataProcessing
     );
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
-      
+      for (const orgUnit of orgUnitsForDataProcessing) {
+        await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
+          headers,
+          serverUrl,
+          orgUnit
+        );
+        // console.log(JSON.stringify(teis));
+      }
     } else {
+      console.log('There is no Community Council present');
     }
-  } catch (e) {
-    await logsHelper.addLogs('ERROR', JSON.stringify(error), 'App');
+  } catch (error) {
+    await logsHelper.addLogs('ERROR', JSON.stringify(error), 'startApp');
   }
 }
 module.exports = {

@@ -6,7 +6,7 @@ async function getOrganisationUnitsFromServerByLevel(
   ) {
     let organisationUnits = [];
     try {
-      const url = `${serverUrl}/api/organisationUnits.json?fields=id,name&filter=level:eq:${level}&paging=false`;
+      const url = `${serverUrl}/api/organisationUnits.json?fields=id,name,level,ancestors[id,name,level]&filter=level:eq:${level}&paging=false`;
       const response = await httpHelper.getHttp(headers, url);
       organisationUnits = response.organisationUnits || organisationUnits;
     } catch (error) {
