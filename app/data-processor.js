@@ -69,6 +69,12 @@ async function getTrackedEntityInstances(headers, serverUrl, orgUnit, program) {
 
     allTrackedEntintyInstances = [...trackedEntintyInstances];
   }
+  allTrackedEntintyInstances = _.sortBy(
+    allTrackedEntintyInstances || [],
+    (instance) => {
+      return new Date(instance.created);
+    }
+  );
   return allTrackedEntintyInstances;
 }
 
