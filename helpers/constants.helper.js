@@ -1,7 +1,7 @@
 const programTypes = {
     caregiver: 'CR',
     ovc: 'OVC',
-    dreams: 'DREAMS'
+    dreams: 'DRM'
 }
 const programs = [
     {

@@ -1,7 +1,21 @@
-function nextChar(letter) {
+function incrementChar(letter) {
     return String.fromCharCode(letter.charCodeAt(0) + 1);
 }
+function getDataPaginationFilters(paginationData, pageSize = 50) {
+    const paginationFilter = [];
+  
+    const pager = paginationData.pager || {};
+    const total =
+      pager && pager.total && pager.total >= pageSize ? pager.total : pageSize;
+    for (let page = 1; page <= Math.round(total / pageSize); page++) {
+      paginationFilter.push(
+        `totalPages=true&pageSize=${pageSize}&page=${page}`,
+      );
+    }
+    return paginationFilter;
+  }
 
 module.exports = {
-    nextChar
+    incrementChar,
+    getDataPaginationFilters
 }

@@ -15,7 +15,7 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
 
     if (programs && programs.length) {
       for (const program of programs) {
-        const trackedEntintyInstances = await getTrackedEntityInstances(
+        let trackedEntintyInstances = await getTrackedEntityInstances(
           headers,
           serverUrl,
           orgUnit,
@@ -24,6 +24,12 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
 
         const programId = program && program.id ? program.id : '';
 
+        const teisWithprimaryUICs = getTeiWithPrimaryUIC(
+          trackedEntintyInstances,
+          orgUnit,
+          program
+        );
+        console.log(JSON.stringify(teisWithprimaryUICs));
         trackedEntityInstancesByOrgUnitObj = {
           ...trackedEntityInstancesByOrgUnitObj,
           [programId]: trackedEntintyInstances,
@@ -92,7 +98,7 @@ async function getFormattedTEIPayloadByProgramWithUIC(
           teiParentsWithItsChildren,
           orgUnit
         );
-        console.log(JSON.stringify(data));
+        // console.log(JSON.stringify(data));
       }
     }
   }
@@ -181,7 +187,7 @@ function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
     let letterCounter = 'A';
     if (children && children.length) {
       for (const child of children) {
-        letterCounter = utilsHelper.nextChar(letterCounter);
+        letterCounter = utilsHelper.incrementChar(letterCounter);
         const updatedChild = generateTeisUICs(
           tei,
           teiCounter,
@@ -216,6 +222,44 @@ function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
     newTei = { ...newTei, attributes };
     return newTei;
   }
+}
+function getTeiWithPrimaryUIC(teis, orgUnit, program) {
+  return _.flatMapDeep(
+    _.map(teis || [], (tei, index) => {
+      let newTei = { ...tei };
+      let attributes = newTei && newTei.attributes ? newTei.attributes : [];
+      const orgUnitName = tei && tei.orgUnit ? tei.orgUnit : '';
+      const orgUnitLevel = orgUnit && orgUnit.level ? orgUnit.level : -1;
+      const ancestorOrgUnitLevel = orgUnitLevel - 1;
+      const ancenstorOrgUnit =
+        orgUnit && orgUnit.level && orgUnit.ancestors
+          ? getAncestorOrgUnit(orgUnit.ancestors, ancestorOrgUnitLevel)
+          : null;
+
+      const ancenstorOrgUnitName =
+        ancenstorOrgUnit && ancenstorOrgUnit.name ? ancenstorOrgUnit.name : '';
+      primaryUICAttribute = _.find(
+        attributes || [],
+        (attributeItem) => attributeItem.attribute === primaryUICMetadataId
+      );
+      if (primaryUICAttribute) {
+        return tei;
+      }
+      const teiCounter = index + 1;
+      const primaryUIC = primaryUICHelper.getPrimaryUIC(
+        ancenstorOrgUnitName,
+        orgUnitName,
+        teiCounter,
+        program.type
+      );
+      attributes = [
+        ...attributes,
+        { attribute: primaryUICMetadataId, value: primaryUIC },
+      ];
+
+      return { ...tei, attributes };
+    })
+  );
 }
 function getAncestorOrgUnit(ancestors, level) {
   return _.find(ancestors || [], (ancestor) => ancestor.level === level);
