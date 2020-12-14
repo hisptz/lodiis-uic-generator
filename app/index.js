@@ -19,12 +19,15 @@ async function startApp() {
     );
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
       for (const orgUnit of orgUnitsForDataProcessing) {
-        await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
+        const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
           serverUrl,
           orgUnit
         );
-        // console.log(JSON.stringify(teis));
+        if(payloads.length) {
+          console.log(JSON.stringify(payloads.slice(0,3)));
+        }
+       
       }
     } else {
       console.log('There is no Community Council present');

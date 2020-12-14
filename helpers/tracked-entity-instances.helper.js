@@ -1,5 +1,6 @@
 const httpHelper = require('./http.helper');
 const utilsHelper = require('./utils.helper');
+const _ = require('lodash');
 async function getTrackedEntityInstanceByProgramAndOrgUnit(
   headers,
   serverUrl,
@@ -8,7 +9,8 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
 ) {
   let trackedEntityInstances = [];
   try {
-    const fields = `fields=orgUnit,trackedEntityInstance,relationships,attributes[attribute,value],created`;
+    const enrollmentFields = `enrollments[enrollment,program,enrollmentDate]`;
+    const fields = `fields=orgUnit,trackedEntityInstance,relationships,${enrollmentFields},attributes[attribute,value],created`;
 
     const paginationData = await getTeiPaginationData(
       headers,
@@ -40,6 +42,26 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
   } finally {
     return trackedEntityInstances;
   }
+}
+async function updateTrackedEntityInstances(headers, serverUrl,  teis) {
+  try {
+
+    const teisChunks = _.chunk(teis || [], 50);
+  
+    for(const teiChunk of teisChunks) {
+      const url = `${serverUrl}/api/trackedEntityInstances.json?strategy=CREATE_AND_UPDATE`;
+      const response = await httpHelper.postHttp(headers,url, teiChunk); 
+    } 
+
+  } catch(error) {
+    await logsHelper.addLogs(
+      'ERROR',
+      JSON.stringify(error),
+      'updateTrackedEntityInstances'
+    );
+       
+  }
+ 
 }
 async function getTeiPaginationData(headers, serverUrl, orgUnit, program) {
   let paginationData = null;
