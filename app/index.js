@@ -24,8 +24,8 @@ async function startApp() {
           serverUrl,
           orgUnit
         );
-        if(payloads.length) {
-          console.log(JSON.stringify(payloads.slice(0,3)));
+        if(payloads && payloads.length) {
+           console.log(JSON.stringify(payloads.slice(0,3)));
         }
        
       }

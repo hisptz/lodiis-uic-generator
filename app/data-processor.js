@@ -106,6 +106,7 @@ async function getFormattedTEIPayloadByProgramWithUIC(
           teiParentsWithItsChildren,
           orgUnit
         );
+       
         const teiPayloads = concatinateTeiWithChildren(teisWithSecondaryUIC);
 
         payloads = [...payloads, ...teiPayloads];
@@ -141,6 +142,20 @@ function getTeiParentsItsChildren(parentTeis, childTeis) {
 
       children = [...children, ...childOfGivenParent];
     }
+    children =
+      children && children.length
+        ? _.sortBy(children || [], (child) => {
+            const childAgeAttribute = _.find(
+              child.attributes || [],
+              (attributeItem) =>
+                attributeItem.attribute === constants.constants.ageMetadataId
+            );
+            console.log({ childAgeAttribute, value: childAgeAttribute.value });
+            return childAgeAttribute && childAgeAttribute.value
+              ? parseInt(childAgeAttribute.value, 10)
+              : 0;
+          }).reverse()
+        : [];
     return { ...parentTei, children };
   });
 }
@@ -169,7 +184,7 @@ function getTeisWithSecondaryUIC(teiParentsWithItsChildren, orgUnit) {
 function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
   let newTei = tei;
 
-  const orgUnitName = tei && tei.orgUnit ? tei.orgUnit : '';
+  const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
 
   if (type === programTypes.caregiver) {
     const secondaryUIC = secondaryUICHelper.getSecondaryUIC(
@@ -226,7 +241,7 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
       let teiCounter = index + 1;
       let newTei = { ...tei };
       let attributes = newTei && newTei.attributes ? newTei.attributes : [];
-      const orgUnitName = tei && tei.orgUnit ? tei.orgUnit : '';
+      const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
       const orgUnitLevel = orgUnit && orgUnit.level ? orgUnit.level : -1;
       const ancestorOrgUnitLevel = orgUnitLevel - 1;
       const ancenstorOrgUnit =
@@ -265,19 +280,6 @@ function getAncestorOrgUnit(ancestors, level) {
 }
 function concatinateTeiWithChildren(teis) {
   let childrenTeiPayloads = [];
-  // if (teis && teis.length) {
-  //   for (const tei of teis) {
-  //     if (tei && tei.children) {
-  //       const teiChildren = [...tei.children];
-  //       children = [...children, ...teiChildren];
-  //       delete tei.children;
-  //       newTeis = [...newTeis,  tei];
-  //     }
-
-  //   }
-  //   return newTeis.concat(children);
-  // }
-  // return teis;
   const parentTeiPayloads = _.map(teis || [], (tei) => {
     childrenTeiPayloads =
       tei && tei.children

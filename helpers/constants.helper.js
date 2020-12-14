@@ -30,7 +30,8 @@ const constants = {
     programs: programs,
     programTypes: programTypes,
     primaryUICMetadataId: 'fTSAY18LgCF',
-    secondaryUICMetadataId: 'eIU7KMx4Tu3'
+    secondaryUICMetadataId: 'eIU7KMx4Tu3',
+    ageMetadataId: 'ls9hlz2tyol'
 }
 
 module.exports = {
