@@ -1,3 +1,6 @@
+const constants = require('./constants.helper');
+const primaryUICMetadataId = constants.constants.primaryUICMetadataId;
+const _ = require('lodash');
 function getPrimaryUIC(ancestorOrgUnitName, orgUnitName, numberCounter, type) {
   const ancestorNameSubString = ancestorOrgUnitName
     ? ancestorOrgUnitName.substring(0, 3).toLocaleUpperCase()
@@ -14,6 +17,17 @@ function addZerosToANumber(number) {
     return number;
   }
 
+  function primaryUICObj(tei) {
+    return tei && tei.attributes
+      ? _.find(
+          tei.attributes || [],
+          (attributeItem) => attributeItem.attribute === primaryUICMetadataId
+        )
+      : '';
+  }
+  
+
   module.exports = {
-      getPrimaryUIC
+      getPrimaryUIC,
+      primaryUICObj
   }

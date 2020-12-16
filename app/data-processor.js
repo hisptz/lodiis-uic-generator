@@ -8,6 +8,7 @@ const secondaryUICHelper = require('../helpers/secondary-uic.helper');
 const primaryUICHelper = require('../helpers/primary-uic.helper');
 const utilsHelper = require('../helpers/utils.helper');
 const _ = require('lodash');
+const logsHelper = require('../helpers/logs.helper');
 
 async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
   try {
@@ -21,6 +22,7 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
           orgUnit,
           program
         );
+        //   console.log(JSON.stringify(trackedEntintyInstances));
 
         const programId = program && program.id ? program.id : '';
 
@@ -39,11 +41,13 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
         orgUnit,
         trackedEntityInstancesByOrgUnitObj
       );
+
       return formattedPayloads;
     } else {
       return [];
     }
   } catch (error) {
+    console.log(error);
     await logsHelper.addLogs(
       'ERROR',
       JSON.stringify(error),
@@ -106,7 +110,7 @@ async function getFormattedTEIPayloadByProgramWithUIC(
           teiParentsWithItsChildren,
           orgUnit
         );
-       
+
         const teiPayloads = concatinateTeiWithChildren(teisWithSecondaryUIC);
 
         payloads = [...payloads, ...teiPayloads];
@@ -120,6 +124,7 @@ async function getFormattedTEIPayloadByProgramWithUIC(
       }
     }
   }
+
   return payloads;
 }
 function getTeiParentsItsChildren(parentTeis, childTeis) {
@@ -161,17 +166,26 @@ function getTeiParentsItsChildren(parentTeis, childTeis) {
 }
 
 function getTeisWithSecondaryUIC(teiParentsWithItsChildren, orgUnit) {
+  const teiLastCounter = getLastTeiSecondaryUICCounter(
+    teiParentsWithItsChildren
+  );
   //  const teisToBeUpdated = _.filter(teiParentsWithItsChildren || [], tei => tei && _.filter(tei.attributes || [], attrib => attrib &&))
   return _.map(teiParentsWithItsChildren || [], (teiItem, index) => {
     const attributes = teiItem && teiItem.attributes ? teiItem.attributes : [];
 
-    let teiCounter = index + 1;
+    let teiCounter = teiLastCounter + 1;
     const secondaryUICAttribute = _.find(
       attributes || [],
       (attributeItem) =>
         attributeItem.attribute === constants.constants.secondaryUICMetadataId
     );
-    teiCounter = secondaryUICAttribute ? teiCounter + 1 : teiCounter;
+    teiCounter =
+      secondaryUICAttribute && secondaryUICAttribute.value
+        ? teiCounter + 1
+        : teiCounter;
+    if (secondaryUICAttribute && secondaryUICAttribute.value) {
+      return teiItem;
+    }
     const teiWithUICs = generateTeisUICs(
       teiItem,
       teiCounter,
@@ -193,27 +207,33 @@ function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
       'A'
     );
     let attributes = newTei && newTei.attributes ? newTei.attributes : [];
-    const secondaryUIVAttribute = _.find(
-      attributes || [],
-      (attributeItem) => attributeItem.attribute === secondaryUICMetadataId
-    );
+
     attributes = [
       ...attributes,
       { attribute: secondaryUICMetadataId, value: secondaryUIC },
     ];
     const children = newTei && newTei.children ? newTei.children : [];
     const updatedChildren = [];
-    let letterCounter = 'A';
+    const lastLetterCounter = getLastTeiSecondaryUICLetterCounter(children);
+    let letterCounter = lastLetterCounter;
+
     if (children && children.length) {
       for (const child of children) {
-        letterCounter = utilsHelper.incrementChar(letterCounter);
-        const updatedChild = generateTeisUICs(
-          child,
-          teiCounter,
-          orgUnit,
-          programTypes.ovc,
-          letterCounter
+        const childSecondaryUICAttribute = secondaryUICHelper.secondaryUICObj(
+          child
         );
+        letterCounter = childSecondaryUICAttribute && childSecondaryUICAttribute.value
+          ? letterCounter
+          : utilsHelper.incrementChar(letterCounter);
+        const updatedChild = childSecondaryUICAttribute && childSecondaryUICAttribute.value
+          ? child
+          : generateTeisUICs(
+              child,
+              teiCounter,
+              orgUnit,
+              programTypes.ovc,
+              letterCounter
+            );
         updatedChildren.push(updatedChild);
       }
     }
@@ -236,9 +256,10 @@ function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
   }
 }
 function getTeiWithPrimaryUIC(teis, orgUnit, program) {
+  const lastTeiCounter = getLastTeiPrimaryUICCounter(teis);
   return _.flatMapDeep(
     _.map(teis || [], (tei, index) => {
-      let teiCounter = index + 1;
+      let teiCounter = lastTeiCounter + 1;
       let newTei = { ...tei };
       let attributes = newTei && newTei.attributes ? newTei.attributes : [];
       const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
@@ -255,9 +276,13 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
         attributes || [],
         (attributeItem) => attributeItem.attribute === primaryUICMetadataId
       );
-      if (primaryUICAttribute) {
-        teiCounter = index + 1;
-        return tei;
+      if (
+        primaryUICAttribute &&
+        primaryUICAttribute.value &&
+        program &&
+        program.type === programTypes.dreams
+      ) {
+        return [];
       }
       teiCounter = index + 1;
       const primaryUIC = primaryUICHelper.getPrimaryUIC(
@@ -266,14 +291,64 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
         teiCounter,
         program.type
       );
-      attributes = [
-        ...attributes,
-        { attribute: primaryUICMetadataId, value: primaryUIC },
-      ];
+      attributes = primaryUICAttribute
+        ? [...attributes]
+        : [
+            ...attributes,
+            { attribute: primaryUICMetadataId, value: primaryUIC },
+          ];
 
       return { ...tei, attributes };
     })
   );
+}
+function getLastTeiPrimaryUICCounter(teis) {
+  const primaryUICCounters = _.flattenDeep(
+    _.map(teis || [], (tei) => {
+      const primaryUICAttributeObj = primaryUICHelper.primaryUICObj(tei);
+      let counter =
+        primaryUICAttributeObj && primaryUICAttributeObj.value
+          ? primaryUICAttributeObj.value.substring(-6)
+          : '';
+      counter = parseInt(counter, 10);
+      return counter;
+      // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
+    })
+  );
+
+  return _.max(primaryUICCounters) ? _.max(primaryUICCounters) : 0;
+}
+function getLastTeiSecondaryUICCounter(teis) {
+  const secondaryUICCounters = _.flattenDeep(
+    _.map(teis || [], (tei) => {
+      const secondaryUICAttributeObj = secondaryUICHelper.secondaryUICObj(tei);
+      let counter =
+        secondaryUICAttributeObj && secondaryUICAttributeObj.value
+          ? secondaryUICAttributeObj.value.substring(3, 7)
+          : '';
+      counter = parseInt(counter, 10);
+      return counter;
+      // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
+    })
+  );
+
+  return _.max(secondaryUICCounters) ? _.max(secondaryUICCounters) : 0;
+}
+function getLastTeiSecondaryUICLetterCounter(teis) {
+  const counters = _.flattenDeep(
+    _.map(teis || [], (tei) => {
+      const secondaryUICAttributeObj = secondaryUICHelper.secondaryUICObj(tei);
+      let counter =
+        secondaryUICAttributeObj && secondaryUICAttributeObj.value
+          ? secondaryUICAttributeObj.value.substring(-1)
+          : '';
+      // counter = parseInt(counter, 10);
+      return counter;
+      // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
+    })
+  );
+
+  return _.max(counters) ? _.max(counters) : A;
 }
 function getAncestorOrgUnit(ancestors, level) {
   return _.find(ancestors || [], (ancestor) => ancestor.level === level);

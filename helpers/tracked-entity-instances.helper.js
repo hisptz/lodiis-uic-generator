@@ -43,25 +43,26 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
     return trackedEntityInstances;
   }
 }
-async function updateTrackedEntityInstances(headers, serverUrl,  teis) {
+async function updateTrackedEntityInstances(headers, serverUrl, teis) {
+  const updateResponse = [];
   try {
-
     const teisChunks = _.chunk(teis || [], 50);
-  
-    for(const teiChunk of teisChunks) {
-      const url = `${serverUrl}/api/trackedEntityInstances.json?strategy=CREATE_AND_UPDATE`;
-      const response = await httpHelper.postHttp(headers,url, teiChunk); 
-    } 
 
-  } catch(error) {
+    for (const teiChunk of teisChunks) {
+      const url = `${serverUrl}/api/trackedEntityInstances?strategy=CREATE_AND_UPDATE`;
+      const response = await httpHelper.postHttp(headers, url, {
+        trackedEntityInstances: teiChunk,
+      });
+      updateResponse.push(response);
+    }
+    return updateResponse;
+  } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
       JSON.stringify(error),
       'updateTrackedEntityInstances'
     );
-       
   }
- 
 }
 async function getTeiPaginationData(headers, serverUrl, orgUnit, program) {
   let paginationData = null;
@@ -83,4 +84,5 @@ async function getTeiPaginationData(headers, serverUrl, orgUnit, program) {
 
 module.exports = {
   getTrackedEntityInstanceByProgramAndOrgUnit,
+  updateTrackedEntityInstances,
 };

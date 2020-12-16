@@ -5,6 +5,8 @@ const dataExtractor = require('./data-extractor');
 const dataProcessor = require('./data-processor');
 const constantsHelper = require('../helpers/constants.helper');
 const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
+const logsHelper = require('../helpers/logs.helper');
+const teiHelper = require('../helpers/tracked-entity-instances.helper');
 async function startApp() {
   const headers = await dhis2Util.getHttpAuthorizationHeader(
     config.sourceConfig.username,
@@ -18,14 +20,16 @@ async function startApp() {
       levelForDataProcessing
     );
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
-      for (const orgUnit of orgUnitsForDataProcessing) {
+      for (const orgUnit of orgUnitsForDataProcessing.slice(1,2)) {
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
           serverUrl,
           orgUnit
         );
         if(payloads && payloads.length) {
-           console.log(JSON.stringify(payloads.slice(0,3)));
+        // const updateResponse = await teiHelper.updateTrackedEntityInstances(headers,serverUrl,payloads);
+         //  console.log(JSON.stringify(updateResponse));
+           console.log(JSON.stringify(payloads.slice(0,1)));
         }
        
       }
@@ -33,6 +37,7 @@ async function startApp() {
       console.log('There is no Community Council present');
     }
   } catch (error) {
+    console.log(error);
     await logsHelper.addLogs('ERROR', JSON.stringify(error), 'startApp');
   }
 }
