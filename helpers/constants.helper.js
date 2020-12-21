@@ -1,7 +1,7 @@
 const programTypes = {
-    caregiver: 'CR',
+    caregiver: 'CG',
     ovc: 'OVC',
-    dreams: 'DREAMS'
+    dreams: 'DRM'
 }
 const programs = [
     {
@@ -30,7 +30,10 @@ const constants = {
     programs: programs,
     programTypes: programTypes,
     primaryUICMetadataId: 'fTSAY18LgCF',
-    secondaryUICMetadataId: 'eIU7KMx4Tu3'
+    secondaryUICMetadataId: 'eIU7KMx4Tu3',
+    // primaryUICMetadataId: 'Lo44pBpt230',
+    // secondaryUICMetadataId: 'I5gM3wN4Vsw',
+    ageMetadataId: 'ls9hlz2tyol'
 }
 
 module.exports = {
