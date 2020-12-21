@@ -22,7 +22,6 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
           orgUnit,
           program
         );
-        //   console.log(JSON.stringify(trackedEntintyInstances));
 
         const programId = program && program.id ? program.id : '';
 
@@ -155,7 +154,6 @@ function getTeiParentsItsChildren(parentTeis, childTeis) {
               (attributeItem) =>
                 attributeItem.attribute === constants.constants.ageMetadataId
             );
-            console.log({ childAgeAttribute, value: childAgeAttribute.value });
             return childAgeAttribute && childAgeAttribute.value
               ? parseInt(childAgeAttribute.value, 10)
               : 0;
@@ -348,7 +346,7 @@ function getLastTeiSecondaryUICLetterCounter(teis) {
     })
   );
 
-  return _.max(counters) ? _.max(counters) : A;
+  return _.max(counters) ? _.max(counters) : 'A';
 }
 function getAncestorOrgUnit(ancestors, level) {
   return _.find(ancestors || [], (ancestor) => ancestor.level === level);
