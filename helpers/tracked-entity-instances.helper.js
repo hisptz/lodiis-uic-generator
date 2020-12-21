@@ -71,7 +71,7 @@ async function getTeiPaginationData(headers, serverUrl, orgUnit, program) {
   let paginationData = null;
   try {
     const pageOptions = `totalPages=true&pageSize=1&fields=none`;
-    const url = `${serverUrl}api/trackedEntityInstances.json?ou=${orgUnit}&program=${program}&${pageOptions}`;
+    const url = `${serverUrl}/api/trackedEntityInstances.json?ou=${orgUnit}&program=${program}&${pageOptions}`;
     const response = await httpHelper.getHttp(headers, url);
     paginationData = response;
   } catch (error) {
