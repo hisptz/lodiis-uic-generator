@@ -167,11 +167,11 @@ function getTeisWithSecondaryUIC(teiParentsWithItsChildren, orgUnit) {
   const teiLastCounter = getLastTeiSecondaryUICCounter(
     teiParentsWithItsChildren
   );
+  let teiCounter = teiLastCounter;
   //  const teisToBeUpdated = _.filter(teiParentsWithItsChildren || [], tei => tei && _.filter(tei.attributes || [], attrib => attrib &&))
   return _.map(teiParentsWithItsChildren || [], (teiItem, index) => {
     const attributes = teiItem && teiItem.attributes ? teiItem.attributes : [];
 
-    let teiCounter = teiLastCounter + 1;
     const secondaryUICAttribute = _.find(
       attributes || [],
       (attributeItem) =>
@@ -179,11 +179,13 @@ function getTeisWithSecondaryUIC(teiParentsWithItsChildren, orgUnit) {
     );
     teiCounter =
       secondaryUICAttribute && secondaryUICAttribute.value
-        ? teiCounter + 1
-        : teiCounter;
-    if (secondaryUICAttribute && secondaryUICAttribute.value) {
-      return teiItem;
-    }
+        ? secondaryUICHelper.getNumberCounterFromSecondaryUIC(
+            secondaryUICAttribute.value
+          )
+        : teiCounter + 1;
+    // if (secondaryUICAttribute && secondaryUICAttribute.value) {
+    //   return teiItem;
+    // }
     const teiWithUICs = generateTeisUICs(
       teiItem,
       teiCounter,
@@ -220,18 +222,20 @@ function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
         const childSecondaryUICAttribute = secondaryUICHelper.secondaryUICObj(
           child
         );
-        letterCounter = childSecondaryUICAttribute && childSecondaryUICAttribute.value
-          ? letterCounter
-          : utilsHelper.incrementChar(letterCounter);
-        const updatedChild = childSecondaryUICAttribute && childSecondaryUICAttribute.value
-          ? child
-          : generateTeisUICs(
-              child,
-              teiCounter,
-              orgUnit,
-              programTypes.ovc,
-              letterCounter
-            );
+        letterCounter =
+          childSecondaryUICAttribute && childSecondaryUICAttribute.value
+            ? letterCounter
+            : utilsHelper.incrementChar(letterCounter);
+        const updatedChild =
+          childSecondaryUICAttribute && childSecondaryUICAttribute.value
+            ? child
+            : generateTeisUICs(
+                child,
+                teiCounter,
+                orgUnit,
+                programTypes.ovc,
+                letterCounter
+              );
         updatedChildren.push(updatedChild);
       }
     }
@@ -255,9 +259,9 @@ function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
 }
 function getTeiWithPrimaryUIC(teis, orgUnit, program) {
   const lastTeiCounter = getLastTeiPrimaryUICCounter(teis);
+  let teiCounter = lastTeiCounter;
   return _.flatMapDeep(
     _.map(teis || [], (tei, index) => {
-      let teiCounter = lastTeiCounter + 1;
       let newTei = { ...tei };
       let attributes = newTei && newTei.attributes ? newTei.attributes : [];
       const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
@@ -282,19 +286,20 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
       ) {
         return [];
       }
-      teiCounter = index + 1;
+      teiCounter = teiCounter + 1;
       const primaryUIC = primaryUICHelper.getPrimaryUIC(
         ancenstorOrgUnitName,
         orgUnitName,
         teiCounter,
         program.type
       );
-      attributes = primaryUICAttribute
-        ? [...attributes]
-        : [
-            ...attributes,
-            { attribute: primaryUICMetadataId, value: primaryUIC },
-          ];
+      attributes =
+        primaryUICAttribute && primaryUICAttribute.value
+          ? [...attributes]
+          : [
+              ...attributes,
+              { attribute: primaryUICMetadataId, value: primaryUIC },
+            ];
 
       return { ...tei, attributes };
     })
@@ -306,7 +311,7 @@ function getLastTeiPrimaryUICCounter(teis) {
       const primaryUICAttributeObj = primaryUICHelper.primaryUICObj(tei);
       let counter =
         primaryUICAttributeObj && primaryUICAttributeObj.value
-          ? primaryUICAttributeObj.value.substring(-6)
+          ? primaryUICAttributeObj.value.substring(primaryUICAttributeObj.value.length - 6)
           : '';
       counter = parseInt(counter, 10);
       return counter;
@@ -322,7 +327,7 @@ function getLastTeiSecondaryUICCounter(teis) {
       const secondaryUICAttributeObj = secondaryUICHelper.secondaryUICObj(tei);
       let counter =
         secondaryUICAttributeObj && secondaryUICAttributeObj.value
-          ? secondaryUICAttributeObj.value.substring(3, 7)
+          ? secondaryUICAttributeObj.value.substring(3, 8)
           : '';
       counter = parseInt(counter, 10);
       return counter;

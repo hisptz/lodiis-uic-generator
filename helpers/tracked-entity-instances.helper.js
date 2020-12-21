@@ -27,6 +27,8 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
         const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${filter}`;
         const response = await httpHelper.getHttp(headers, url);
 
+       
+
         trackedEntityInstances =
           response && response.trackedEntityInstances
             ? [...trackedEntityInstances, ...response.trackedEntityInstances]
@@ -34,6 +36,7 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
       }
     }
   } catch (error) {
+    console.log(error);
     await logsHelper.addLogs(
       'ERROR',
       JSON.stringify(error),

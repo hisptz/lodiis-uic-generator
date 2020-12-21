@@ -1,14 +1,18 @@
 const constants = require('../helpers/constants.helper');
 const secondaryUICMetadataId = constants.constants.secondaryUICMetadataId;
 const _ = require('lodash');
-function getSecondaryUIC(orgUnitName,numberCounter, letterCounter ) {
-    const orgUnitNameSubString = orgUnitName ? orgUnitName.substring(0,3).toLocaleUpperCase() : '';
-    const counterStr = addZerosToANumber(numberCounter); 
+function getSecondaryUIC(orgUnitName, numberCounter, letterCounter) {
+  const orgUnitNameSubString = orgUnitName
+    ? orgUnitName.substring(0, 3).toLocaleUpperCase()
+    : '';
+  const counterStr = addZerosToANumber(numberCounter);
 
-  return `${orgUnitNameSubString}${counterStr}${letterCounter}`
+  return `${orgUnitNameSubString}${counterStr}${letterCounter}`;
 }
 function addZerosToANumber(number) {
-  if (number<=99999) { number = ("00000"+number).slice(-5); }
+  if (number <= 99999) {
+    number = ('00000' + number).slice(-5);
+  }
   return number;
 }
 function secondaryUICObj(tei) {
@@ -19,8 +23,12 @@ function secondaryUICObj(tei) {
       )
     : '';
 }
+function getNumberCounterFromSecondaryUIC(secondaryUIC) {
+  return secondaryUIC ? _.parseInt(secondaryUIC.substring(3, 8), 10) : 0;
+}
 
 module.exports = {
   getSecondaryUIC,
-  secondaryUICObj
-}
+  secondaryUICObj,
+  getNumberCounterFromSecondaryUIC
+};
