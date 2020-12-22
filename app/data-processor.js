@@ -22,6 +22,7 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
           orgUnit,
           program
         );
+       
 
         const programId = program && program.id ? program.id : '';
 
@@ -104,7 +105,7 @@ async function getFormattedTEIPayloadByProgramWithUIC(
         const teiParentsWithItsChildren = getTeiParentsItsChildren(
           parentTeis,
           childTeis
-        );
+        );    
         const teisWithSecondaryUIC = getTeisWithSecondaryUIC(
           teiParentsWithItsChildren,
           orgUnit
@@ -330,14 +331,18 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
       ) {
         return [];
       } else if (
-        (primaryUICAttribute &&
+        primaryUICAttribute &&
           primaryUICAttribute.value &&
           program &&
-          program.type === programTypes.caregiver) ||
-        program.type === programTypes.ovc
+          program.type === programTypes.caregiver
       ) {
         return tei;
-      }
+      } else if(primaryUICAttribute &&
+        primaryUICAttribute.value &&
+        program &&
+        program.type === programTypes.ovc) {
+          return tei;
+        }
       teiCounter = teiCounter + 1;
       const primaryUIC = primaryUICHelper.getPrimaryUIC(
         ancenstorOrgUnitName,
