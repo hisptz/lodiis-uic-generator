@@ -1,14 +1,14 @@
-const constants = require("../helpers/constants.helper");
+const constants = require('../helpers/constants.helper');
 const primaryUICMetadataId = constants.constants.primaryUICMetadataId;
 const secondaryUICMetadataId = constants.constants.secondaryUICMetadataId;
 const programs = constants.constants.programs;
 const programTypes = constants.constants.programTypes;
-const teiHelper = require("../helpers/tracked-entity-instances.helper");
-const secondaryUICHelper = require("../helpers/secondary-uic.helper");
-const primaryUICHelper = require("../helpers/primary-uic.helper");
-const utilsHelper = require("../helpers/utils.helper");
-const _ = require("lodash");
-const logsHelper = require("../helpers/logs.helper");
+const teiHelper = require('../helpers/tracked-entity-instances.helper');
+const secondaryUICHelper = require('../helpers/secondary-uic.helper');
+const primaryUICHelper = require('../helpers/primary-uic.helper');
+const utilsHelper = require('../helpers/utils.helper');
+const _ = require('lodash');
+const logsHelper = require('../helpers/logs.helper');
 
 async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
   try {
@@ -23,7 +23,7 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
           program
         );
 
-        const programId = program && program.id ? program.id : "";
+        const programId = program && program.id ? program.id : '';
 
         const teisWithprimaryUICs = getTeiWithPrimaryUIC(
           trackedEntintyInstances,
@@ -48,15 +48,15 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
   } catch (error) {
     console.log(error);
     await logsHelper.addLogs(
-      "ERROR",
+      'ERROR',
       JSON.stringify(error),
-      "getTrackedEntityPayloadsByOrgUnit"
+      'getTrackedEntityPayloadsByOrgUnit'
     );
   }
 }
 async function getTrackedEntityInstances(headers, serverUrl, orgUnit, program) {
-  const orgUnitId = orgUnit && orgUnit.id ? orgUnit.id : "";
-  const programId = program && program.id ? program.id : "";
+  const orgUnitId = orgUnit && orgUnit.id ? orgUnit.id : '';
+  const programId = program && program.id ? program.id : '';
   // const childProgramId = program && program.childProgram ? program.childProgram : '';
   let allTrackedEntintyInstances = [];
   if (programId && orgUnitId) {
@@ -131,20 +131,19 @@ function getTeiParentsItsChildren(parentTeis, childTeis) {
     let children = [];
     const relationships =
       parentTei && parentTei.relationships ? parentTei.relationships : [];
-    for (const relationship of relationships) {
-      const to = relationship && relationship.to ? relationship.to : null;
-      const trackedEntityInstance =
-        to &&
-        to.trackedEntityInstance &&
-        to.trackedEntityInstance.trackedEntityInstance
-          ? to.trackedEntityInstance.trackedEntityInstance
-          : null;
-      const childOfGivenParent = _.filter(
-        childTeis || [],
-        (childTei) => childTei.trackedEntityInstance === trackedEntityInstance
-      );
-
-      children = [...children, ...childOfGivenParent];
+    if (relationships && relationships.length) {
+      for (const relationship of relationships) {
+        const perentChildrenRelationship = getChildParentRelationship(
+          parentTei,
+          relationship,
+          childTeis
+        );
+        const childOfGivenParent =
+          perentChildrenRelationship && perentChildrenRelationship.children
+            ? perentChildrenRelationship.children
+            : [];
+        children = [...children, ...childOfGivenParent];
+      }
     }
     children =
       children && children.length
@@ -161,6 +160,38 @@ function getTeiParentsItsChildren(parentTeis, childTeis) {
         : [];
     return { ...parentTei, children };
   });
+}
+function getChildParentRelationship(tei, relationship, children) {
+  const teiId =
+    tei && tei.trackedEntityInstance ? tei.trackedEntityInstance : '';
+  const from = relationship && relationship.from ? relationship.from : null;
+  const to = relationship && relationship.to ? relationship.to : null;
+  const fromTei =
+    from &&
+    from.trackedEntityInstance &&
+    from.trackedEntityInstance.trackedEntityInstance
+      ? from.trackedEntityInstance.trackedEntityInstance
+      : null;
+  const toTei =
+    to &&
+    to.trackedEntityInstance &&
+    to.trackedEntityInstance.trackedEntityInstance
+      ? to.trackedEntityInstance.trackedEntityInstance
+      : null;
+    
+  if (teiId && teiId === fromTei) {
+    return { teiId, children: getChildOfGivenParent(toTei, children) };
+  } else if (teiId && teiId === toTei) {
+    return { teiId, children: getChildOfGivenParent(fromTei, children) };
+  } else {
+    return null;
+  }
+}
+function getChildOfGivenParent(teiId, children) {
+  return _.filter(
+    children || [],
+    (childTei) => childTei.trackedEntityInstance === teiId
+  );
 }
 
 function getTeisWithSecondaryUIC(teiParentsWithItsChildren, orgUnit) {
@@ -199,16 +230,16 @@ function getTeisWithSecondaryUIC(teiParentsWithItsChildren, orgUnit) {
     return teiWithUICs;
   });
 }
-function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = "") {
+function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
   let newTei = tei;
 
-  const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : "";
+  const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
 
   if (type === programTypes.caregiver) {
     const secondaryUIC = secondaryUICHelper.getSecondaryUIC(
       orgUnitName,
       teiCounter,
-      "A"
+      'A'
     );
     let attributes = newTei && newTei.attributes ? newTei.attributes : [];
 
@@ -277,7 +308,7 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
     _.map(teis || [], (tei, index) => {
       let newTei = { ...tei };
       let attributes = newTei && newTei.attributes ? newTei.attributes : [];
-      const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : "";
+      const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
       const orgUnitLevel = orgUnit && orgUnit.level ? orgUnit.level : -1;
       const ancestorOrgUnitLevel = orgUnitLevel - 1;
       const ancenstorOrgUnit =
@@ -286,7 +317,7 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
           : null;
 
       const ancenstorOrgUnitName =
-        ancenstorOrgUnit && ancenstorOrgUnit.name ? ancenstorOrgUnit.name : "";
+        ancenstorOrgUnit && ancenstorOrgUnit.name ? ancenstorOrgUnit.name : '';
       const primaryUICAttribute = _.find(
         attributes || [],
         (attributeItem) => attributeItem.attribute === primaryUICMetadataId
@@ -335,7 +366,7 @@ function getLastTeiPrimaryUICCounter(teis) {
           ? primaryUICAttributeObj.value.substring(
               primaryUICAttributeObj.value.length - 6
             )
-          : "";
+          : '';
       counter = parseInt(counter, 10);
       return counter;
       // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
@@ -351,7 +382,7 @@ function getLastTeiSecondaryUICCounter(teis) {
       let counter =
         secondaryUICAttributeObj && secondaryUICAttributeObj.value
           ? secondaryUICAttributeObj.value.substring(3, 8)
-          : "";
+          : '';
       counter = parseInt(counter, 10);
       return counter;
       // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
@@ -367,14 +398,14 @@ function getLastTeiSecondaryUICLetterCounter(teis) {
       let counter =
         secondaryUICAttributeObj && secondaryUICAttributeObj.value
           ? secondaryUICAttributeObj.value.substring(-1)
-          : "";
+          : '';
       // counter = parseInt(counter, 10);
       return counter;
       // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
     })
   );
 
-  return _.max(counters) ? _.max(counters) : "A";
+  return _.max(counters) ? _.max(counters) : 'A';
 }
 function getAncestorOrgUnit(ancestors, level) {
   return _.find(ancestors || [], (ancestor) => ancestor.level === level);
