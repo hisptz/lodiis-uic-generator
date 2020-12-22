@@ -1,14 +1,14 @@
-const constants = require('../helpers/constants.helper');
+const constants = require("../helpers/constants.helper");
 const primaryUICMetadataId = constants.constants.primaryUICMetadataId;
 const secondaryUICMetadataId = constants.constants.secondaryUICMetadataId;
 const programs = constants.constants.programs;
 const programTypes = constants.constants.programTypes;
-const teiHelper = require('../helpers/tracked-entity-instances.helper');
-const secondaryUICHelper = require('../helpers/secondary-uic.helper');
-const primaryUICHelper = require('../helpers/primary-uic.helper');
-const utilsHelper = require('../helpers/utils.helper');
-const _ = require('lodash');
-const logsHelper = require('../helpers/logs.helper');
+const teiHelper = require("../helpers/tracked-entity-instances.helper");
+const secondaryUICHelper = require("../helpers/secondary-uic.helper");
+const primaryUICHelper = require("../helpers/primary-uic.helper");
+const utilsHelper = require("../helpers/utils.helper");
+const _ = require("lodash");
+const logsHelper = require("../helpers/logs.helper");
 
 async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
   try {
@@ -23,7 +23,7 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
           program
         );
 
-        const programId = program && program.id ? program.id : '';
+        const programId = program && program.id ? program.id : "";
 
         const teisWithprimaryUICs = getTeiWithPrimaryUIC(
           trackedEntintyInstances,
@@ -48,15 +48,15 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
   } catch (error) {
     console.log(error);
     await logsHelper.addLogs(
-      'ERROR',
+      "ERROR",
       JSON.stringify(error),
-      'getTrackedEntityPayloadsByOrgUnit'
+      "getTrackedEntityPayloadsByOrgUnit"
     );
   }
 }
 async function getTrackedEntityInstances(headers, serverUrl, orgUnit, program) {
-  const orgUnitId = orgUnit && orgUnit.id ? orgUnit.id : '';
-  const programId = program && program.id ? program.id : '';
+  const orgUnitId = orgUnit && orgUnit.id ? orgUnit.id : "";
+  const programId = program && program.id ? program.id : "";
   // const childProgramId = program && program.childProgram ? program.childProgram : '';
   let allTrackedEntintyInstances = [];
   if (programId && orgUnitId) {
@@ -177,15 +177,19 @@ function getTeisWithSecondaryUIC(teiParentsWithItsChildren, orgUnit) {
       (attributeItem) =>
         attributeItem.attribute === constants.constants.secondaryUICMetadataId
     );
-    teiCounter =
-      secondaryUICAttribute && secondaryUICAttribute.value
-        ? secondaryUICHelper.getNumberCounterFromSecondaryUIC(
-            secondaryUICAttribute.value
-          )
-        : teiCounter + 1;
-    // if (secondaryUICAttribute && secondaryUICAttribute.value) {
-    //   return teiItem;
-    // }
+
+    if (secondaryUICAttribute && secondaryUICAttribute.value) {
+      const existedTeiCounter = secondaryUICHelper.getNumberCounterFromSecondaryUIC(
+        secondaryUICAttribute.value
+      );
+      const children = getTeiChildrenWithSecondaryUIC(
+        teiItem,
+        existedTeiCounter,
+        orgUnit
+      );
+      return { ...teiItem, children };
+    }
+    teiCounter = teiCounter + 1;
     const teiWithUICs = generateTeisUICs(
       teiItem,
       teiCounter,
@@ -195,16 +199,16 @@ function getTeisWithSecondaryUIC(teiParentsWithItsChildren, orgUnit) {
     return teiWithUICs;
   });
 }
-function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
+function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = "") {
   let newTei = tei;
 
-  const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
+  const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : "";
 
   if (type === programTypes.caregiver) {
     const secondaryUIC = secondaryUICHelper.getSecondaryUIC(
       orgUnitName,
       teiCounter,
-      'A'
+      "A"
     );
     let attributes = newTei && newTei.attributes ? newTei.attributes : [];
 
@@ -212,33 +216,11 @@ function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
       ...attributes,
       { attribute: secondaryUICMetadataId, value: secondaryUIC },
     ];
-    const children = newTei && newTei.children ? newTei.children : [];
-    const updatedChildren = [];
-    const lastLetterCounter = getLastTeiSecondaryUICLetterCounter(children);
-    let letterCounter = lastLetterCounter;
-
-    if (children && children.length) {
-      for (const child of children) {
-        const childSecondaryUICAttribute = secondaryUICHelper.secondaryUICObj(
-          child
-        );
-        letterCounter =
-          childSecondaryUICAttribute && childSecondaryUICAttribute.value
-            ? letterCounter
-            : utilsHelper.incrementChar(letterCounter);
-        const updatedChild =
-          childSecondaryUICAttribute && childSecondaryUICAttribute.value
-            ? child
-            : generateTeisUICs(
-                child,
-                teiCounter,
-                orgUnit,
-                programTypes.ovc,
-                letterCounter
-              );
-        updatedChildren.push(updatedChild);
-      }
-    }
+    const updatedChildren = getTeiChildrenWithSecondaryUIC(
+      newTei,
+      teiCounter,
+      orgUnit
+    );
 
     newTei = { ...newTei, attributes, children: updatedChildren };
     return newTei;
@@ -257,14 +239,45 @@ function generateTeisUICs(tei, teiCounter, orgUnit, type, letterCount = '') {
     return newTei;
   }
 }
+function getTeiChildrenWithSecondaryUIC(tei, teiParentCounter, orgUnit) {
+  const updatedChildren = [];
+  const children = tei && tei.children ? tei.children : [];
+  const lastLetterCounter = getLastTeiSecondaryUICLetterCounter(children);
+  let letterCounter = lastLetterCounter;
+
+  if (children && children.length) {
+    for (const child of children) {
+      const childSecondaryUICAttribute = secondaryUICHelper.secondaryUICObj(
+        child
+      );
+      letterCounter =
+        childSecondaryUICAttribute && childSecondaryUICAttribute.value
+          ? letterCounter
+          : utilsHelper.incrementChar(letterCounter);
+      const updatedChild =
+        childSecondaryUICAttribute && childSecondaryUICAttribute.value
+          ? child
+          : generateTeisUICs(
+              child,
+              teiParentCounter,
+              orgUnit,
+              programTypes.ovc,
+              letterCounter
+            );
+      updatedChildren.push(updatedChild);
+    }
+  }
+  return updatedChildren;
+}
 function getTeiWithPrimaryUIC(teis, orgUnit, program) {
   const lastTeiCounter = getLastTeiPrimaryUICCounter(teis);
+
   let teiCounter = lastTeiCounter;
   return _.flatMapDeep(
     _.map(teis || [], (tei, index) => {
       let newTei = { ...tei };
       let attributes = newTei && newTei.attributes ? newTei.attributes : [];
-      const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
+      const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : "";
       const orgUnitLevel = orgUnit && orgUnit.level ? orgUnit.level : -1;
       const ancestorOrgUnitLevel = orgUnitLevel - 1;
       const ancenstorOrgUnit =
@@ -273,7 +286,7 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
           : null;
 
       const ancenstorOrgUnitName =
-        ancenstorOrgUnit && ancenstorOrgUnit.name ? ancenstorOrgUnit.name : '';
+        ancenstorOrgUnit && ancenstorOrgUnit.name ? ancenstorOrgUnit.name : "";
       const primaryUICAttribute = _.find(
         attributes || [],
         (attributeItem) => attributeItem.attribute === primaryUICMetadataId
@@ -285,6 +298,14 @@ function getTeiWithPrimaryUIC(teis, orgUnit, program) {
         program.type === programTypes.dreams
       ) {
         return [];
+      } else if (
+        (primaryUICAttribute &&
+          primaryUICAttribute.value &&
+          program &&
+          program.type === programTypes.caregiver) ||
+        program.type === programTypes.ovc
+      ) {
+        return tei;
       }
       teiCounter = teiCounter + 1;
       const primaryUIC = primaryUICHelper.getPrimaryUIC(
@@ -311,8 +332,10 @@ function getLastTeiPrimaryUICCounter(teis) {
       const primaryUICAttributeObj = primaryUICHelper.primaryUICObj(tei);
       let counter =
         primaryUICAttributeObj && primaryUICAttributeObj.value
-          ? primaryUICAttributeObj.value.substring(primaryUICAttributeObj.value.length - 6)
-          : '';
+          ? primaryUICAttributeObj.value.substring(
+              primaryUICAttributeObj.value.length - 6
+            )
+          : "";
       counter = parseInt(counter, 10);
       return counter;
       // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
@@ -328,7 +351,7 @@ function getLastTeiSecondaryUICCounter(teis) {
       let counter =
         secondaryUICAttributeObj && secondaryUICAttributeObj.value
           ? secondaryUICAttributeObj.value.substring(3, 8)
-          : '';
+          : "";
       counter = parseInt(counter, 10);
       return counter;
       // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
@@ -344,14 +367,14 @@ function getLastTeiSecondaryUICLetterCounter(teis) {
       let counter =
         secondaryUICAttributeObj && secondaryUICAttributeObj.value
           ? secondaryUICAttributeObj.value.substring(-1)
-          : '';
+          : "";
       // counter = parseInt(counter, 10);
       return counter;
       // return primaryUICAttributeObj && primaryUICAttributeObj.value ? primaryUICAttributeObj.value  : [];
     })
   );
 
-  return _.max(counters) ? _.max(counters) : 'A';
+  return _.max(counters) ? _.max(counters) : "A";
 }
 function getAncestorOrgUnit(ancestors, level) {
   return _.find(ancestors || [], (ancestor) => ancestor.level === level);
