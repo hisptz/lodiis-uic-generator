@@ -24,6 +24,10 @@ const programs = [
     }
     
 ]
+const metadata = {
+    firstname: 'WTZ7GLTrE8Q',
+    surname: 'rSP9c21JsfC'
+}
 
 const constants = {
     orgUnitLevelThree: 3,
@@ -31,6 +35,7 @@ const constants = {
     programTypes: programTypes,
     primaryUICMetadataId: 'fTSAY18LgCF',
     secondaryUICMetadataId: 'eIU7KMx4Tu3',
+    metadata: metadata,
     // primaryUICMetadataId: 'Lo44pBpt230',
     // secondaryUICMetadataId: 'I5gM3wN4Vsw',
     ageMetadataId: 'ls9hlz2tyol'

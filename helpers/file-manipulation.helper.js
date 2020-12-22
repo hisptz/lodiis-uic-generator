@@ -3,6 +3,9 @@ const fs = require('fs');
 const shelljs = require('shelljs');
 const Promise = require('promise');
 const logsHelper = require('./logs.helper');
+const XLSX = require('xlsx');
+const FileSaver = require('file-saver');
+const EXCEL_EXTENSION = '.xlsx';
 
 const fileDir = 'files-folder';
 
@@ -85,6 +88,53 @@ function getSanitizedFileName(filename) {
     '_'
   );
 }
+// async function exportAsExcelFile(json, excelFileName) {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       const worksheet = XLSX.utils.json_to_sheet(json);
+//       const workbook = {
+//         Sheets: { data: worksheet },
+//         SheetNames: ['data'],
+//       };
+//       const excelBuffer = XLSX.write(workbook, {
+//         bookType: 'xlsx',
+//         type: 'array',
+//       });
+//       resolve();
+//       saveAsExcelFile(excelBuffer, excelFileName);
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+// }
+// async function saveAsExcelFile(buffer, fileName) {
+//   try {
+//     const data = new Blob([buffer], { type: EXCEL_TYPE });
+//     FileSaver.saveAs(
+//       data,
+//       fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION,
+//     );
+//   } catch (e) {
+//     throw e;
+//   }
+// }
+async function writeToExcelFile(jsonData, filePath) {
+  try {
+    const ws = XLSX.utils.json_to_sheet(jsonData, {
+      header: _.uniq(_.flattenDeep(_.map(jsonData, (data) => _.keys(data)))),
+    });
+    let workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, ws, 'beneficiary list');
+    XLSX.writeFile(workbook, filePath);
+  } catch (error) {
+    console.log(error);
+    // await logsHelper.addLogs(
+    //   'error',
+    //   error.message || error,
+    //   'writeToExcelFile'
+    // );
+  }
+}
 
 module.exports = {
   intiateFilesDirectories,
@@ -93,4 +143,5 @@ module.exports = {
   writeToFile,
   fileDir,
   getFileNamesFromDirectories,
+  writeToExcelFile
 };

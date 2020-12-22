@@ -8,6 +8,9 @@ const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
 const logsHelper = require('../helpers/logs.helper');
 const teiHelper = require('../helpers/tracked-entity-instances.helper');
 const _ = require('lodash');
+const utilsHelper = require('../helpers/utils.helper');
+const filesManipulationHelper = require('../helpers/file-manipulation.helper');
+const dirName = 'files-folder';
 async function startApp() {
   const headers = await dhis2Util.getHttpAuthorizationHeader(
     config.sourceConfig.username,
@@ -21,18 +24,35 @@ async function startApp() {
       levelForDataProcessing
     );
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
-      for (const orgUnit of orgUnitsForDataProcessing.slice(0,2)) {
+    
+      let summaries = [];
+      for (const orgUnit of orgUnitsForDataProcessing) {
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
           serverUrl,
           orgUnit
         );
         if (payloads && payloads.length) {
-         const updateResponse = await teiHelper.updateTrackedEntityInstances(headers,serverUrl,payloads);
-         console.log(JSON.stringify({ payloads, updateResponse, orgUnit}));
-          // console.log(JSON.stringify(payloads));
+          const updateResponse = await teiHelper.updateTrackedEntityInstances(
+            headers,
+            serverUrl,
+            payloads
+          );
+          // console.log(JSON.stringify({ payloads, updateResponse, orgUnit}));
+          const summary = utilsHelper.generateSummary(
+            payloads,
+            updateResponse,
+            orgUnit
+          );
+          summaries = [...summaries, ...summary];
         }
       }
+      console.log('Generating summary...');
+      await filesManipulationHelper.writeToExcelFile(
+        summaries,
+        `${dirName}/summary.xlsx`
+      );
+      console.log('Summary generated successfully');
     } else {
       console.log('There is no Community Council present');
     }
