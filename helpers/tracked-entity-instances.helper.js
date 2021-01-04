@@ -82,6 +82,9 @@ async function getTeiPaginationData(headers, serverUrl, orgUnit, program) {
     return paginationData;
   }
 }
+function getAttributesFromTEI(tei) {
+  return tei && tei.attributes ? tei.attributes : [];
+}
 function getAttributeObjectByIdFromTEI(attributes, attributeId) {
   return _.find(
     attributes || [],
@@ -100,5 +103,6 @@ module.exports = {
   getTrackedEntityInstanceByProgramAndOrgUnit,
   updateTrackedEntityInstances,
   getAttributeObjectByIdFromTEI,
-  getAttributeValueByIdFromTEI
+  getAttributeValueByIdFromTEI,
+  getAttributesFromTEI
 };
