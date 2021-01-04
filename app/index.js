@@ -2,13 +2,13 @@ const dhis2Util = require('../helpers/dhis2-util.helper');
 const config = require('../config');
 const serverUrl = config.sourceConfig.url;
 const dataExtractor = require('./data-extractor');
-const dataProcessor = require('./data-processor');
 const constantsHelper = require('../helpers/constants.helper');
 const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
 const logsHelper = require('../helpers/logs.helper');
-const teiHelper = require('../helpers/tracked-entity-instances.helper');
-const _ = require('lodash');
 const utilsHelper = require('../helpers/utils.helper');
+const _ = require('lodash');
+const dataProcessor = require('./data-processor');
+const dataUploader = require('./data-uploader');
 const filesManipulationHelper = require('../helpers/file-manipulation.helper');
 const dirName = 'files-folder';
 async function startApp() {
@@ -24,28 +24,23 @@ async function startApp() {
       levelForDataProcessing
     );
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
-    
       let summaries = [];
       for (const orgUnit of orgUnitsForDataProcessing) {
+
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
           serverUrl,
           orgUnit
         );
-        if (payloads && payloads.length) {
-          const updateResponse = await teiHelper.updateTrackedEntityInstances(
-            headers,
-            serverUrl,
-            payloads
-          );
-          // console.log(JSON.stringify({ payloads, updateResponse, orgUnit}));
+        const response = await dataUploader.uploadUpdatedTEIS(headers,serverUrl,payloads);
+      
           const summary = utilsHelper.generateSummary(
             payloads,
-            updateResponse,
+            response,
             orgUnit
           );
           summaries = [...summaries, ...summary];
-        }
+        
       }
       console.log('Generating summary...');
       await filesManipulationHelper.writeToExcelFile(
