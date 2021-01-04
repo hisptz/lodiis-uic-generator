@@ -27,8 +27,6 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
         const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${filter}`;
         const response = await httpHelper.getHttp(headers, url);
 
-       
-
         trackedEntityInstances =
           response && response.trackedEntityInstances
             ? [...trackedEntityInstances, ...response.trackedEntityInstances]
@@ -84,8 +82,23 @@ async function getTeiPaginationData(headers, serverUrl, orgUnit, program) {
     return paginationData;
   }
 }
+function getAttributeObjectByIdFromTEI(attributes, attributeId) {
+  return _.find(
+    attributes || [],
+    (attributeItem) => attributeItem.attribute === attributeId
+  );
+}
+function getAttributeValueByIdFromTEI(attributes, attributeId) {
+  const attributeObj = _.find(
+    attributes || [],
+    (attributeItem) => attributeItem.attribute === attributeId
+  );
+  return attributeObj && attributeObj.value ? attributeObj.value : '';
+}
 
 module.exports = {
   getTrackedEntityInstanceByProgramAndOrgUnit,
   updateTrackedEntityInstances,
+  getAttributeObjectByIdFromTEI,
+  getAttributeValueByIdFromTEI
 };
