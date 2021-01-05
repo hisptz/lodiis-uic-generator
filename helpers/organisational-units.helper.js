@@ -22,6 +22,21 @@ async function getOrganisationUnitsFromServerByLevel(
     return organisationUnits;
   }
 }
+function getOrgUnitName(orgUnit) {
+  return orgUnit && orgUnit.name ? orgUnit.name : '';
+}
+function getOrgUnitLevel(orgUnit) {
+  return orgUnit && orgUnit.name ? orgUnit.name : '';
+}
+function getOrgUnitAncestorByLevel(orgUnit, level) {
+  return _.find(
+    orgUnit.ancestors || [],
+    (ancestor) => ancestor.level === level
+  );
+}
 module.exports = {
   getOrganisationUnitsFromServerByLevel,
+  getOrgUnitName,
+  getOrgUnitLevel,
+  getOrgUnitAncestorByLevel,
 };

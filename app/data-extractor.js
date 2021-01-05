@@ -1,4 +1,5 @@
 const orgUnitHelper = require('../helpers/organisational-units.helper');
+const logsHelper = require('../helpers/logs.helper');
 async function getOrgUnitsForDataProcessing(headers, serverUrl, level) {
   try {
     const communityCouncils = await orgUnitHelper.getOrganisationUnitsFromServerByLevel(
@@ -6,8 +7,9 @@ async function getOrgUnitsForDataProcessing(headers, serverUrl, level) {
       serverUrl,
       level
     );
+
     return communityCouncils;
-  } catch (error) { 
+  } catch (error) {
    await logsHelper.addLogs('ERROR', JSON.stringify(error), 'getOrgUnitsForDataProcessing');
   }
 }

@@ -98,11 +98,47 @@ function getAttributeValueByIdFromTEI(attributes, attributeId) {
   );
   return attributeObj && attributeObj.value ? attributeObj.value : '';
 }
+function sortTeiArrayByEnrollmentDate(trackedEntityInstances, programId) {
+ return _.sortBy(
+      trackedEntityInstances || [],
+      (instance) => {
+        const enrollment = _.find(
+            instance.enrollments || [],
+            (enrolmentItem) => enrolmentItem.program === programId
+        );
+        return new Date(enrollment.enrollmentDate);
+      }
+  );
+}
+function sortTeiArrayByAge(trackedEntityInstances, ageMetadataId) {
+  return trackedEntityInstances && trackedEntityInstances.length
+      ? _.sortBy(trackedEntityInstances || [], (tei) => {
+    const childAgeAttribute = getAttributeValueByIdFromTEI(tei.attributes, ageMetadataId);
+    return childAgeAttribute && childAgeAttribute.value
+        ? parseInt(childAgeAttribute.value, 10)
+        : 0;
+  }).reverse(): [];
+}
+function separateTeiParentFromChildren(trackedEntityInstances) {
+  let childrenTeiPayloads = [];
+  const parentTeiPayloads = _.map(trackedEntityInstances || [], (tei) => {
+    childrenTeiPayloads =
+        tei && tei.children
+            ? [...childrenTeiPayloads, ...tei.children]
+            : [...childrenTeiPayloads];
+    delete tei.children;
+    return tei;
+  });
+  return childrenTeiPayloads.concat(parentTeiPayloads);
+}
 
 module.exports = {
   getTrackedEntityInstanceByProgramAndOrgUnit,
   updateTrackedEntityInstances,
   getAttributeObjectByIdFromTEI,
   getAttributeValueByIdFromTEI,
-  getAttributesFromTEI
+  getAttributesFromTEI,
+  sortTeiArrayByEnrollmentDate,
+  sortTeiArrayByAge,
+  separateTeiParentFromChildren
 };

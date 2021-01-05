@@ -26,9 +26,38 @@ function secondaryUICObj(tei) {
 function getNumberCounterFromSecondaryUIC(secondaryUIC) {
   return secondaryUIC ? _.parseInt(secondaryUIC.substring(3, 8), 10) : 0;
 }
+function getLastTeiSecondaryUICCounter(trackedEntityInstances) {
+  const secondaryUICCounters = _.flattenDeep(
+      _.map(trackedEntityInstances || [], (tei) => {
+        const secondaryUICAttributeObj = secondaryUICObj(tei);
+        let counter =
+            secondaryUICAttributeObj && secondaryUICAttributeObj.value
+                ? secondaryUICAttributeObj.value.substring(3, 8)
+                : '';
+        counter = parseInt(counter, 10);
+        return counter;
+      })
+  );
+
+  return _.max(secondaryUICCounters) ? _.max(secondaryUICCounters) : 0;
+}
+function getLastTeiSecondaryUICLetterCounter(trackedEntityInstances) {
+    const counters = _.flattenDeep(
+        _.map(trackedEntityInstances || [], (tei) => {
+            const secondaryUICAttributeObj = secondaryUICObj(tei);
+            return secondaryUICAttributeObj && secondaryUICAttributeObj.value
+                ? secondaryUICAttributeObj.value.substring(-1)
+                : '';
+        })
+    );
+
+    return counters && _.max(counters) ? _.max(counters) : 'A';
+}
 
 module.exports = {
   getSecondaryUIC,
   secondaryUICObj,
-  getNumberCounterFromSecondaryUIC
+  getNumberCounterFromSecondaryUIC,
+  getLastTeiSecondaryUICCounter,
+    getLastTeiSecondaryUICLetterCounter
 };

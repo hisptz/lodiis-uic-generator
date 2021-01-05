@@ -23,8 +23,11 @@ async function startApp() {
       serverUrl,
       levelForDataProcessing
     );
+
+
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
       let summaries = [];
+
       for (const orgUnit of orgUnitsForDataProcessing) {
 
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
@@ -32,15 +35,22 @@ async function startApp() {
           serverUrl,
           orgUnit
         );
-        const response = await dataUploader.uploadUpdatedTEIS(headers,serverUrl,payloads);
-      
-          const summary = utilsHelper.generateSummary(
-            payloads,
-            response,
-            orgUnit
-          );
-          summaries = [...summaries, ...summary];
-        
+        if(payloads && payloads.length) {
+          console.log(JSON.stringify(payloads));
+        }
+
+        // const response = await dataUploader.uploadUpdatedTEIS(
+        //   headers,
+        //   serverUrl,
+        //   payloads
+        // );
+        //
+        // const summary = utilsHelper.generateSummary(
+        //   payloads,
+        //   response,
+        //   orgUnit
+        // );
+        // summaries = [...summaries, ...summary];
       }
       console.log('Generating summary...');
       await filesManipulationHelper.writeToExcelFile(
