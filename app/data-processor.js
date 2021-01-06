@@ -130,9 +130,9 @@ function getParentWithChildrenFormattedPayloads(
     orgUnit
   );
 
-  return teiHelper.separateTeiParentFromChildren(
+  return trackedEntityInstancesWithSecondaryUIC ? teiHelper.separateTeiParentFromChildren(
     trackedEntityInstancesWithSecondaryUIC
-  );
+  ) : [];
 }
 function getTeiParentsWithItsChildren(
   parentTrackedEntityInstances,
@@ -200,7 +200,7 @@ function getTrackedEntityInstancesWithSecondaryUIC(
   let teiCounter = secondaryUICHelper.getLastTeiSecondaryUICCounter(
     teiParentsWithItsChildren
   );
-  return _.map(teiParentsWithItsChildren || [], (teiItem) => {
+  return _.flattenDeep( _.map(teiParentsWithItsChildren || [], (teiItem) => {
     const attributes = teiItem && teiItem.attributes ? teiItem.attributes : [];
 
     const secondaryUICAttribute = teiHelper.getAttributeObjectByIdFromTEI(
@@ -217,16 +217,20 @@ function getTrackedEntityInstancesWithSecondaryUIC(
         existedTeiCounter,
         orgUnit
       );
+      if(teiItem && teiItem.hasOldPrimaryUIC && secondaryUICAttribute && secondaryUICAttribute.value) {
+        return [];
+      }
       return { ...teiItem, children };
     }
     teiCounter = teiCounter + 1;
+
     return generateTrackedEntityInstancesUICs(
       teiItem,
       teiCounter,
       orgUnit,
       programTypes.caregiver
     );
-  });
+  }));
 }
 function generateTrackedEntityInstancesUICs(
   tei,
@@ -254,7 +258,8 @@ function generateTrackedEntityInstancesUICs(
       teiCounter,
       orgUnit
     );
-    newTei = { ...newTei, attributes, children: updatedChildren };
+
+    newTei =  { ...newTei, attributes, children: updatedChildren };
     return newTei;
   } else if (type === programTypes.ovc) {
     const secondaryUIC = secondaryUICHelper.getSecondaryUIC(
@@ -305,7 +310,7 @@ function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
   let teiCounter = primaryUICHelper.getLastTeiPrimaryUICCounter(
     trackedEntityInstances
   );
-  return _.flatMapDeep(
+  return _.flattenDeep(
     _.map(trackedEntityInstances || [], (tei) => {
       let attributes = tei && tei.attributes ? tei.attributes : [];
       const orgUnitName = orgUnitHelper.getOrgUnitName(orgUnit);

@@ -1,4 +1,5 @@
 const httpHelper = require('./http.helper');
+const _ = require('lodash');
 async function getOrganisationUnitsFromServerByLevel(
   headers,
   serverUrl,

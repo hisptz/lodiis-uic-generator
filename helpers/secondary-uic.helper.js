@@ -28,30 +28,37 @@ function getNumberCounterFromSecondaryUIC(secondaryUIC) {
 }
 function getLastTeiSecondaryUICCounter(trackedEntityInstances) {
   const secondaryUICCounters = _.flattenDeep(
-      _.map(trackedEntityInstances || [], (tei) => {
-        const secondaryUICAttributeObj = secondaryUICObj(tei);
-        let counter =
-            secondaryUICAttributeObj && secondaryUICAttributeObj.value
-                ? secondaryUICAttributeObj.value.substring(3, 8)
-                : '';
-        counter = parseInt(counter, 10);
-        return counter;
-      })
+    _.map(trackedEntityInstances || [], (tei) => {
+      const secondaryUICAttributeObj = secondaryUICObj(tei);
+      const lastCharacterIndex =
+        secondaryUICAttributeObj &&
+        secondaryUICAttributeObj.value &&
+        secondaryUICAttributeObj.value.length
+          ? secondaryUICAttributeObj.value.length - 1
+          : -1;
+      //  const lastCharacterIndex =
+      let counter =
+        secondaryUICAttributeObj && secondaryUICAttributeObj.value && lastCharacterIndex > -1
+          ? secondaryUICAttributeObj.value.substring(3, lastCharacterIndex)
+          : '0';
+      counter = parseInt(counter, 10);
+      return counter;
+    })
   );
 
   return _.max(secondaryUICCounters) ? _.max(secondaryUICCounters) : 0;
 }
 function getLastTeiSecondaryUICLetterCounter(trackedEntityInstances) {
-    const counters = _.flattenDeep(
-        _.map(trackedEntityInstances || [], (tei) => {
-            const secondaryUICAttributeObj = secondaryUICObj(tei);
-            return secondaryUICAttributeObj && secondaryUICAttributeObj.value
-                ? secondaryUICAttributeObj.value.substring(-1)
-                : '';
-        })
-    );
+  const counters = _.flattenDeep(
+    _.map(trackedEntityInstances || [], (tei) => {
+      const secondaryUICAttributeObj = secondaryUICObj(tei);
+      return secondaryUICAttributeObj && secondaryUICAttributeObj.value
+        ? secondaryUICAttributeObj.value.substring(-1)
+        : '';
+    })
+  );
 
-    return counters && _.max(counters) ? _.max(counters) : 'A';
+  return counters && _.max(counters) ? _.max(counters) : 'A';
 }
 
 module.exports = {
@@ -59,5 +66,5 @@ module.exports = {
   secondaryUICObj,
   getNumberCounterFromSecondaryUIC,
   getLastTeiSecondaryUICCounter,
-    getLastTeiSecondaryUICLetterCounter
+  getLastTeiSecondaryUICLetterCounter,
 };

@@ -1,5 +1,6 @@
 const httpHelper = require('./http.helper');
 const utilsHelper = require('./utils.helper');
+const logsHelper = require('./logs.helper');
 const _ = require('lodash');
 async function getTrackedEntityInstanceByProgramAndOrgUnit(
   headers,
@@ -18,8 +19,8 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
       orgUnit,
       program
     );
-    const paginationFilters = utilsHelper.getDataPaginationFilters(
-      paginationData
+    const paginationFilters = getDataPaginationFilters(
+      paginationData, 50
     );
 
     if (paginationFilters && paginationFilters.length) {
@@ -130,6 +131,17 @@ function separateTeiParentFromChildren(trackedEntityInstances) {
     return tei;
   });
   return childrenTeiPayloads.concat(parentTeiPayloads);
+}
+function getDataPaginationFilters(paginationData, pageSize = 50) {
+  const paginationFilter = [];
+
+  const pager =
+      paginationData && paginationData.pager ? paginationData.pager : {};
+  const total = pager && pager.total >= pageSize ? pager.total : pageSize;
+  for (let page = 1; page <= Math.ceil(total / pageSize); page++) {
+    paginationFilter.push(`totalPages=true&pageSize=${pageSize}&page=${page}`);
+  }
+  return paginationFilter;
 }
 
 module.exports = {

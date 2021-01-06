@@ -3,10 +3,7 @@ const constantsHelper = require('./constants.helper');
 const constants = constantsHelper.constants;
 const metadataConstants = constants.metadata;
 const requestResponseConstants = constants.requestResponse;
-const {
-  getAttributeValueByIdFromTEI,
-  getAttributesFromTEI,
-} = require('./tracked-entity-instances.helper');
+const teiHelper = require('./tracked-entity-instances.helper');
 function incrementChar(letter) {
   return String.fromCharCode(letter.charCodeAt(0) + 1);
 }
@@ -20,6 +17,9 @@ function getDataPaginationFilters(paginationData, pageSize = 50) {
     paginationFilter.push(`totalPages=true&pageSize=${pageSize}&page=${page}`);
   }
   return paginationFilter;
+}
+function updateProcessStatus(status){
+  console.log(status);
 }
 
 function generateSummary(payloads, responses, orgUnit) {
@@ -48,7 +48,7 @@ function getFormattedSummaries(importSummaries, payloads, orgUnit) {
       payloads || [],
       (payload) => payload.trackedEntityInstance === reference
     );
-    const attributes = getAttributesFromTEI(referencePayload);
+    const attributes = teiHelper.getAttributesFromTEI(referencePayload);
 
     const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
     const attributeColumns = getAttributeSummaryColumns(attributes);
@@ -72,7 +72,7 @@ function getAttributeSummaryColumns(attributes) {
     for(const column of attributeColumns) {
        const columnName = column && column.name ? column.name : '';
        if(columnName) {
-         const value =  getAttributeValueByIdFromTEI(
+         const value =  teiHelper.getAttributeValueByIdFromTEI(
              attributes,
              metadataConstants[columnName]
          );
@@ -89,4 +89,5 @@ module.exports = {
   incrementChar,
   getDataPaginationFilters,
   generateSummary,
+  updateProcessStatus
 };

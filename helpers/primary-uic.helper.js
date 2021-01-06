@@ -55,9 +55,9 @@ function getTeiPayloadWithOldPrimaryUIC(program, tei) {
         } else if (
             program.type === programTypes.caregiver
         ) {
-            return tei;
+            return {...tei, hasOldPrimaryUIC: true };
         } else if( program.type === programTypes.ovc) {
-            return tei;
+            return {...tei, hasOldPrimaryUIC: true };
         }  else {
             return [];
         }

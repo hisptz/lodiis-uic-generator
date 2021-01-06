@@ -1,12 +1,13 @@
 const app = require('./app');
 const logsHelper = require('./helpers/logs.helper');
+const {updateProcessStatus} = require('./helpers/utils.helper');
 start();
 async function start() {
   try {
+    updateProcessStatus('Starting script...')
     await logsHelper.addLogs('INFO', `Start an app`, 'App');
-    // const params = process.argv;
-    // const filterIndex = 2;
-    // const orgUnitFilterId = params[filterIndex] ?  params[filterIndex] : null;
+
+
 
    await app.startApp();
   } catch (error) {

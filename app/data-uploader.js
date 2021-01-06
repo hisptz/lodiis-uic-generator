@@ -3,6 +3,7 @@ const teiHelper = require('../helpers/tracked-entity-instances.helper');
 async function uploadUpdatedTEIS(headers, serverUrl, orgUnit, payloads) {
   try {
     if (payloads && payloads.length) {
+
       const updateResponse = await teiHelper.updateTrackedEntityInstances(
         headers,
         serverUrl,
@@ -13,6 +14,7 @@ async function uploadUpdatedTEIS(headers, serverUrl, orgUnit, payloads) {
       return null;
     }
   } catch (error) {
+    console.log(error);
     await logsHelper.addLogs(
       'ERROR',
       JSON.stringify(error),

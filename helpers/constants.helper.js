@@ -73,7 +73,7 @@ const constants = {
   primaryUICMetadataId: 'fTSAY18LgCF',
   secondaryUICMetadataId: 'eIU7KMx4Tu3',
   metadata: metadata,
-  requestResponse,
+  requestResponse: requestResponse,
   // primaryUICMetadataId: 'Lo44pBpt230',
   // secondaryUICMetadataId: 'I5gM3wN4Vsw',
   ageMetadataId: 'ls9hlz2tyol',

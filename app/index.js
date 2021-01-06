@@ -18,15 +18,19 @@ async function startApp() {
   );
   try {
     // Get all org units require to retrieve data from programs
-    const orgUnitsForDataProcessing = await dataExtractor.getOrgUnitsForDataProcessing(
+    let orgUnitsForDataProcessing = await dataExtractor.getOrgUnitsForDataProcessing(
       headers,
       serverUrl,
       levelForDataProcessing
     );
 
+    orgUnitsForDataProcessing = _.filter(orgUnitsForDataProcessing || [], orgUnit => orgUnit.id === 'sa7UsmZoO6t');
+
 
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
       let summaries = [];
+
+      utilsHelper.updateProcessStatus('Generating Primary and secondary UICs...');
 
       for (const orgUnit of orgUnitsForDataProcessing) {
 
@@ -35,22 +39,21 @@ async function startApp() {
           serverUrl,
           orgUnit
         );
-        if(payloads && payloads.length) {
-          console.log(JSON.stringify(payloads));
-        }
 
-        // const response = await dataUploader.uploadUpdatedTEIS(
-        //   headers,
-        //   serverUrl,
-        //   payloads
-        // );
-        //
-        // const summary = utilsHelper.generateSummary(
-        //   payloads,
-        //   response,
-        //   orgUnit
-        // );
-        // summaries = [...summaries, ...summary];
+
+        const response = await dataUploader.uploadUpdatedTEIS(
+          headers,
+          serverUrl,
+          orgUnit,
+          payloads
+        );
+
+        const summary = utilsHelper.generateSummary(
+          payloads,
+          response,
+          orgUnit
+        );
+        summaries = [...summaries, ...summary];
       }
       console.log('Generating summary...');
       await filesManipulationHelper.writeToExcelFile(
