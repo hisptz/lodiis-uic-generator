@@ -18,13 +18,13 @@ async function startApp() {
   );
   try {
     // Get all org units require to retrieve data from programs
-    let orgUnitsForDataProcessing = await dataExtractor.getOrgUnitsForDataProcessing(
+    const orgUnitsForDataProcessing = await dataExtractor.getOrgUnitsForDataProcessing(
       headers,
       serverUrl,
       levelForDataProcessing
     );
 
-    orgUnitsForDataProcessing = _.filter(orgUnitsForDataProcessing || [], orgUnit => orgUnit.id === 'sa7UsmZoO6t');
+    // orgUnitsForDataProcessing = _.filter(orgUnitsForDataProcessing || [], orgUnit => orgUnit.id === 'zbHbxA2SZ96');
 
 
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
@@ -61,6 +61,7 @@ async function startApp() {
         `${dirName}/summary.xlsx`
       );
       console.log('Summary generated successfully');
+      await logsHelper.addLogs('INFO', `End an app`, 'App');
     } else {
       console.log('There is no Community Council present');
     }
