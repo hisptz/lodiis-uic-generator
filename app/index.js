@@ -2,13 +2,13 @@ const dhis2Util = require('../helpers/dhis2-util.helper');
 const config = require('../config');
 const serverUrl = config.sourceConfig.url;
 const dataExtractor = require('./data-extractor');
-const dataProcessor = require('./data-processor');
 const constantsHelper = require('../helpers/constants.helper');
 const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
 const logsHelper = require('../helpers/logs.helper');
-const teiHelper = require('../helpers/tracked-entity-instances.helper');
-const _ = require('lodash');
 const utilsHelper = require('../helpers/utils.helper');
+const _ = require('lodash');
+const dataProcessor = require('./data-processor');
+const dataUploader = require('./data-uploader');
 const filesManipulationHelper = require('../helpers/file-manipulation.helper');
 const dirName = 'files-folder';
 async function startApp() {
@@ -23,29 +23,37 @@ async function startApp() {
       serverUrl,
       levelForDataProcessing
     );
+
+    // orgUnitsForDataProcessing = _.filter(orgUnitsForDataProcessing || [], orgUnit => orgUnit.id === 'zbHbxA2SZ96');
+
+
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
-    
       let summaries = [];
+
+      utilsHelper.updateProcessStatus('Generating Primary and secondary UICs...');
+
       for (const orgUnit of orgUnitsForDataProcessing) {
+
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
           serverUrl,
           orgUnit
         );
-        if (payloads && payloads.length) {
-          const updateResponse = await teiHelper.updateTrackedEntityInstances(
-            headers,
-            serverUrl,
-            payloads
-          );
-          // console.log(JSON.stringify({ payloads, updateResponse, orgUnit}));
-          const summary = utilsHelper.generateSummary(
-            payloads,
-            updateResponse,
-            orgUnit
-          );
-          summaries = [...summaries, ...summary];
-        }
+
+
+        const response = await dataUploader.uploadUpdatedTEIS(
+          headers,
+          serverUrl,
+          orgUnit,
+          payloads
+        );
+
+        const summary = utilsHelper.generateSummary(
+          payloads,
+          response,
+          orgUnit
+        );
+        summaries = [...summaries, ...summary];
       }
       console.log('Generating summary...');
       await filesManipulationHelper.writeToExcelFile(
@@ -53,6 +61,7 @@ async function startApp() {
         `${dirName}/summary.xlsx`
       );
       console.log('Summary generated successfully');
+      await logsHelper.addLogs('INFO', `End an app`, 'App');
     } else {
       console.log('There is no Community Council present');
     }

@@ -2,6 +2,8 @@ const _ = require('lodash');
 const constantsHelper = require('./constants.helper');
 const constants = constantsHelper.constants;
 const metadataConstants = constants.metadata;
+const requestResponseConstants = constants.requestResponse;
+const teiHelper = require('./tracked-entity-instances.helper');
 function incrementChar(letter) {
   return String.fromCharCode(letter.charCodeAt(0) + 1);
 }
@@ -16,6 +18,9 @@ function getDataPaginationFilters(paginationData, pageSize = 50) {
   }
   return paginationFilter;
 }
+function updateProcessStatus(status){
+  console.log(status);
+}
 
 function generateSummary(payloads, responses, orgUnit) {
   let summaries = [];
@@ -27,62 +32,62 @@ function generateSummary(payloads, responses, orgUnit) {
         responseItem.response.importSummaries
           ? responseItem.response.importSummaries
           : [];
-      const formattedSummaries = _.map(importSummaries || [], (summary) => {
-        const reference = summary && summary.reference ? summary.reference : '';
-        const status = summary && summary.status ? summary.status : '';
-        const referencePayload = _.find(
-          payloads || [],
-          (payload) => payload.trackedEntityInstance === reference
-        );
-        const attributes =
-          referencePayload && referencePayload.attributes
-            ? referencePayload.attributes
-            : [];
-        const firstnameObj = _.find(
-          attributes || [],
-          (attributeItem) =>
-            attributeItem.attribute === metadataConstants.firstname
-        );
-        const surnameObj = _.find(
-          attributes || [],
-          (attributeItem) =>
-            attributeItem.attribute === metadataConstants.surname
-        );
-        const primaryUICObj = _.find(
-          attributes || [],
-          (attributeItem) =>
-            attributeItem.attribute === constants.primaryUICMetadataId
-        );
-        const secondaryUICObj = _.find(
-          attributes || [],
-          (attributeItem) =>
-            attributeItem.attribute === constants.secondaryUICMetadataId
-        );
-        const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
-
-        return {
-          trackedEntityInstance: reference,
-          firstname:
-            firstnameObj && firstnameObj.value ? firstnameObj.value : '',
-          surname: surnameObj && surnameObj.value ? surnameObj.value : '',
-          orgUnit: orgUnitName,
-          primaryUIC:
-            primaryUICObj && primaryUICObj.value ? primaryUICObj.value : '',
-          secondaryUIC:
-            secondaryUICObj && secondaryUICObj.value
-              ? secondaryUICObj.value
-              : '',
-          status,
-        };
-      });
+      const formattedSummaries = getFormattedSummaries(importSummaries, payloads,orgUnit);
       summaries = [...summaries, ...formattedSummaries];
     }
   }
   return summaries;
 }
 
+
+function getFormattedSummaries(importSummaries, payloads, orgUnit) {
+  return _.map(importSummaries || [], (summary) => {
+    const reference = summary && summary.reference ? summary.reference : '';
+    const status = summary && summary.status ? summary.status : '';
+    const referencePayload = _.find(
+      payloads || [],
+      (payload) => payload.trackedEntityInstance === reference
+    );
+    const attributes = teiHelper.getAttributesFromTEI(referencePayload);
+
+    const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
+    const attributeColumns = getAttributeSummaryColumns(attributes);
+
+    return {
+      trackedEntityInstance: reference,
+      orgUnit: orgUnitName,
+      status,
+      ...attributeColumns
+    };
+  });
+}
+
+function getAttributeSummaryColumns(attributes) {
+  let values = {};
+  const attributeColumns = _.filter(
+    requestResponseConstants.summary.columns || [],
+    (column) => column.isAttribute
+  );
+  if(attributeColumns && attributeColumns.length) {
+    for(const column of attributeColumns) {
+       const columnName = column && column.name ? column.name : '';
+       if(columnName) {
+         const value =  teiHelper.getAttributeValueByIdFromTEI(
+             attributes,
+             metadataConstants[columnName]
+         );
+         values = {...values, [columnName]: value };
+
+       }
+
+    }
+  }
+  return values;
+}
+
 module.exports = {
   incrementChar,
   getDataPaginationFilters,
-  generateSummary
+  generateSummary,
+  updateProcessStatus
 };
