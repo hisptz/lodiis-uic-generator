@@ -1,5 +1,6 @@
 const httpHelper = require('./http.helper');
 const utilsHelper = require('./utils.helper');
+const logsHelper = require('./logs.helper');
 const _ = require('lodash');
 async function getTrackedEntityInstanceByProgramAndOrgUnit(
   headers,
@@ -18,16 +19,14 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
       orgUnit,
       program
     );
-    const paginationFilters = utilsHelper.getDataPaginationFilters(
-      paginationData
+    const paginationFilters = getDataPaginationFilters(
+      paginationData, 50
     );
 
     if (paginationFilters && paginationFilters.length) {
       for (const filter of paginationFilters) {
         const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${filter}`;
         const response = await httpHelper.getHttp(headers, url);
-
-       
 
         trackedEntityInstances =
           response && response.trackedEntityInstances
@@ -84,8 +83,74 @@ async function getTeiPaginationData(headers, serverUrl, orgUnit, program) {
     return paginationData;
   }
 }
+function getAttributesFromTEI(tei) {
+  return tei && tei.attributes ? tei.attributes : [];
+}
+function getAttributeObjectByIdFromTEI(attributes, attributeId) {
+  return _.find(
+    attributes || [],
+    (attributeItem) => attributeItem.attribute === attributeId
+  );
+}
+function getAttributeValueByIdFromTEI(attributes, attributeId) {
+  const attributeObj = _.find(
+    attributes || [],
+    (attributeItem) => attributeItem.attribute === attributeId
+  );
+  return attributeObj && attributeObj.value ? attributeObj.value : '';
+}
+function sortTeiArrayByEnrollmentDate(trackedEntityInstances, programId) {
+ return _.sortBy(
+      trackedEntityInstances || [],
+      (instance) => {
+        const enrollment = _.find(
+            instance.enrollments || [],
+            (enrolmentItem) => enrolmentItem.program === programId
+        );
+        return new Date(enrollment.enrollmentDate);
+      }
+  );
+}
+function sortTeiArrayByAge(trackedEntityInstances, ageMetadataId) {
+  return trackedEntityInstances && trackedEntityInstances.length
+      ? _.sortBy(trackedEntityInstances || [], (tei) => {
+    const childAgeAttribute = getAttributeValueByIdFromTEI(tei.attributes, ageMetadataId);
+    return childAgeAttribute && childAgeAttribute.value
+        ? parseInt(childAgeAttribute.value, 10)
+        : 0;
+  }).reverse(): [];
+}
+function separateTeiParentFromChildren(trackedEntityInstances) {
+  let childrenTeiPayloads = [];
+  const parentTeiPayloads = _.map(trackedEntityInstances || [], (tei) => {
+    childrenTeiPayloads =
+        tei && tei.children
+            ? [...childrenTeiPayloads, ...tei.children]
+            : [...childrenTeiPayloads];
+    delete tei.children;
+    return tei;
+  });
+  return childrenTeiPayloads.concat(parentTeiPayloads);
+}
+function getDataPaginationFilters(paginationData, pageSize = 50) {
+  const paginationFilter = [];
+
+  const pager =
+      paginationData && paginationData.pager ? paginationData.pager : {};
+  const total = pager && pager.total >= pageSize ? pager.total : pageSize;
+  for (let page = 1; page <= Math.ceil(total / pageSize); page++) {
+    paginationFilter.push(`totalPages=true&pageSize=${pageSize}&page=${page}`);
+  }
+  return paginationFilter;
+}
 
 module.exports = {
   getTrackedEntityInstanceByProgramAndOrgUnit,
   updateTrackedEntityInstances,
+  getAttributeObjectByIdFromTEI,
+  getAttributeValueByIdFromTEI,
+  getAttributesFromTEI,
+  sortTeiArrayByEnrollmentDate,
+  sortTeiArrayByAge,
+  separateTeiParentFromChildren
 };
