@@ -26,13 +26,19 @@ async function startApp() {
 
     // orgUnitsForDataProcessing = _.filter(orgUnitsForDataProcessing || [], orgUnit => orgUnit.id === 'zbHbxA2SZ96');
 
-
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
       let summaries = [];
 
-      utilsHelper.updateProcessStatus('Generating Primary and secondary UICs...');
+      utilsHelper.updateProcessStatus(
+        'Generating Primary and secondary UICs...'
+      );
 
       for (const orgUnit of orgUnitsForDataProcessing) {
+        const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
+
+        utilsHelper.updateProcessStatus(
+          `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}`
+        );
 
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
@@ -40,11 +46,11 @@ async function startApp() {
           orgUnit
         );
 
-
         const response = await dataUploader.uploadUpdatedTEIS(
           headers,
           serverUrl,
           orgUnit,
+          orgUnitName,
           payloads
         );
 

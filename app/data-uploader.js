@@ -1,9 +1,18 @@
 const logsHelper = require('../helpers/logs.helper');
 const teiHelper = require('../helpers/tracked-entity-instances.helper');
-async function uploadUpdatedTEIS(headers, serverUrl, orgUnit, payloads) {
+const utilsHelper = require('../helpers/utils.helper');
+async function uploadUpdatedTEIS(
+  headers,
+  serverUrl,
+  orgUnit,
+  orgUnitName,
+  payloads
+) {
+  utilsHelper.updateProcessStatus(
+    `Saving updated Tracked entity instances in ${orgUnitName}`
+  );
   try {
     if (payloads && payloads.length) {
-
       const updateResponse = await teiHelper.updateTrackedEntityInstances(
         headers,
         serverUrl,
