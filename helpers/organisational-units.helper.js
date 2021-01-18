@@ -27,7 +27,7 @@ function getOrgUnitName(orgUnit) {
   return orgUnit && orgUnit.name ? orgUnit.name : '';
 }
 function getOrgUnitLevel(orgUnit) {
-  return orgUnit && orgUnit.name ? orgUnit.name : '';
+  return orgUnit && orgUnit.level ? orgUnit.level : '';
 }
 function getOrgUnitAncestorByLevel(orgUnit, level) {
   return _.find(
