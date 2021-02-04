@@ -6,10 +6,12 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
   headers,
   serverUrl,
   orgUnit,
-  program
+  program,
+  startDate, endDate
 ) {
   let trackedEntityInstances = [];
   try {
+    const dateLimits = startDate || endDate ? `lastUpdatedStartDate=${startDate}&lastUpdatedEndDate=${endDate}`: '';
     const enrollmentFields = `enrollments[enrollment,program,enrollmentDate]`;
     const fields = `fields=orgUnit,trackedEntityInstance,relationships,${enrollmentFields},attributes[attribute,value],created`;
 
@@ -17,7 +19,9 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
       headers,
       serverUrl,
       orgUnit,
-      program
+      program,
+        startDate,
+        endDate
     );
     const paginationFilters = getDataPaginationFilters(
       paginationData, 50
@@ -25,7 +29,7 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
 
     if (paginationFilters && paginationFilters.length) {
       for (const filter of paginationFilters) {
-        const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${filter}`;
+        const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${dateLimits}&${filter}`;
         const response = await httpHelper.getHttp(headers, url);
 
         trackedEntityInstances =
@@ -66,11 +70,12 @@ async function updateTrackedEntityInstances(headers, serverUrl, teis) {
     );
   }
 }
-async function getTeiPaginationData(headers, serverUrl, orgUnit, program) {
+async function getTeiPaginationData(headers, serverUrl, orgUnit, program, startDate, endDate) {
   let paginationData = null;
   try {
+    const dateLimits = startDate || endDate ? `lastUpdatedStartDate=${startDate}&lastUpdatedEndDate=${endDate}`: '';
     const pageOptions = `totalPages=true&pageSize=1&fields=none`;
-    const url = `${serverUrl}/api/trackedEntityInstances.json?ou=${orgUnit}&program=${program}&${pageOptions}`;
+    const url = `${serverUrl}/api/trackedEntityInstances.json?ou=${orgUnit}&program=${program}&${dateLimits}&${pageOptions}`;
     const response = await httpHelper.getHttp(headers, url);
     paginationData = response;
   } catch (error) {

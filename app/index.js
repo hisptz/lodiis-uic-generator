@@ -11,7 +11,7 @@ const dataProcessor = require('./data-processor');
 const dataUploader = require('./data-uploader');
 const filesManipulationHelper = require('../helpers/file-manipulation.helper');
 const dirName = 'files-folder';
-async function startApp() {
+async function startApp(commands) {
   const headers = await dhis2Util.getHttpAuthorizationHeader(
     config.sourceConfig.username,
     config.sourceConfig.password
@@ -24,6 +24,7 @@ async function startApp() {
       levelForDataProcessing
     );
 
+
     // orgUnitsForDataProcessing = _.filter(orgUnitsForDataProcessing || [], orgUnit => orgUnit.id === 'zbHbxA2SZ96');
 
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
@@ -33,17 +34,24 @@ async function startApp() {
         'Generating Primary and secondary UICs...'
       );
 
+      let orgUnitIndex = 0;
+
       for (const orgUnit of orgUnitsForDataProcessing) {
+        orgUnitIndex = orgUnitIndex + 1;
         const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
+        const startDate = commands && commands.from ? commands.from : '';
+        const endDate = commands && commands.to ? commands.to : '';
 
         utilsHelper.updateProcessStatus(
-          `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}`
+          `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`
         );
 
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
           serverUrl,
-          orgUnit
+          orgUnit,
+            startDate,
+            endDate
         );
 
         const response = await dataUploader.uploadUpdatedTEIS(
