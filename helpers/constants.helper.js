@@ -16,6 +16,19 @@ const commands = {
       endDateIndex: 6
     }
 }
+const appStatusOptions = {
+    running: 'RUNNING',
+    stopped: 'STOPPED',
+    underMaintenance: 'UNDER_MAINTENANCE'
+}
+const defaultStatusData = {
+    appStatus: appStatusOptions.running,
+    timeStarted: new Date(),
+}
+const appStatus = {
+    appStatusOptions: appStatusOptions,
+    defaultStatusData: defaultStatusData
+}
 const programTypes = {
   caregiver: 'CG',
   ovc: 'OVC',
@@ -97,6 +110,7 @@ const constants = {
   // primaryUICMetadataId: 'Lo44pBpt230',
   // secondaryUICMetadataId: 'I5gM3wN4Vsw',
   ageMetadataId: 'ls9hlz2tyol',
+    appStatus: appStatus
 };
 
 module.exports = {

@@ -7,10 +7,13 @@ const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
 const logsHelper = require('../helpers/logs.helper');
 const utilsHelper = require('../helpers/utils.helper');
 const _ = require('lodash');
+const statusHelper = require('../helpers/status.helper');
 const dataProcessor = require('./data-processor');
 const dataUploader = require('./data-uploader');
 const filesManipulationHelper = require('../helpers/file-manipulation.helper');
 const dirName = 'files-folder';
+const constants = constantsHelper.constants;
+const appStatus = constants.appStatus;
 async function startApp(commands) {
   const headers = await dhis2Util.getHttpAuthorizationHeader(
     config.sourceConfig.username,
@@ -75,6 +78,12 @@ async function startApp(commands) {
         `${dirName}/summary.xlsx`
       );
       console.log('Summary generated successfully');
+
+      await statusHelper.updateAppStatusConfiguration(headers,serverUrl, {
+        appStatus: appStatus.appStatusOptions.stopped,
+        timeStopped: new Date()
+      });
+
       await logsHelper.addLogs('INFO', `End an app`, 'App');
     } else {
       console.log('There is no Community Council present');
