@@ -7,7 +7,7 @@ const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
 const logsHelper = require('../helpers/logs.helper');
 const utilsHelper = require('../helpers/utils.helper');
 const _ = require('lodash');
-const statusHelper = require('../helpers/status.helper');
+// const statusHelper = require('../helpers/status.helper');
 const dataProcessor = require('./data-processor');
 const dataUploader = require('./data-uploader');
 const filesManipulationHelper = require('../helpers/file-manipulation.helper');
@@ -79,10 +79,10 @@ async function startApp(commands) {
       );
       console.log('Summary generated successfully');
 
-      await statusHelper.updateAppStatusConfiguration(headers,serverUrl, {
-        appStatus: appStatus.appStatusOptions.stopped,
-        timeStopped: new Date()
-      });
+      // await statusHelper.updateAppStatusConfiguration(headers,serverUrl, {
+      //   appStatus: appStatus.appStatusOptions.stopped,
+      //   timeStopped: new Date()
+      // });
 
       await logsHelper.addLogs('INFO', `End an app`, 'App');
     } else {
