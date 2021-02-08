@@ -19,10 +19,12 @@ const commands = {
 const appStatusOptions = {
     running: 'RUNNING',
     stopped: 'STOPPED',
-    underMaintenance: 'UNDER_MAINTENANCE'
+    underMaintenance: 'UNDER_MAINTENANCE',
+    unknown: 'UNKNOWN',
+    started: 'STARTED'
 }
 const defaultStatusData = {
-    appStatus: appStatusOptions.running,
+    appStatus: appStatusOptions.started,
     timeStarted: new Date(),
 }
 const appStatus = {
