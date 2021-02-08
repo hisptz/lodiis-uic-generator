@@ -13,7 +13,7 @@ const utilsHelper = require('../helpers/utils.helper');
 const _ = require('lodash');
 const logsHelper = require('../helpers/logs.helper');
 
-async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
+async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit, startDate, endDate) {
   try {
     let trackedEntityInstancesByOrgUnitObj = {};
 
@@ -23,7 +23,9 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
           headers,
           serverUrl,
           orgUnit,
-          program
+          program,
+            startDate,
+            endDate
         );
 
         const programId = program && program.id ? program.id : '';
@@ -55,7 +57,7 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit) {
     );
   }
 }
-async function getTrackedEntityInstances(headers, serverUrl, orgUnit, program) {
+async function getTrackedEntityInstances(headers, serverUrl, orgUnit, program, startDate, endDate) {
   const orgUnitId = orgUnit && orgUnit.id ? orgUnit.id : '';
   const programId = program && program.id ? program.id : '';
   // const childProgramId = program && program.childProgram ? program.childProgram : '';
@@ -65,7 +67,8 @@ async function getTrackedEntityInstances(headers, serverUrl, orgUnit, program) {
       headers,
       serverUrl,
       orgUnitId,
-      programId
+      programId,
+        startDate, endDate
     );
 
     allTrackedEntityInstances = [...trackedEntityInstances];

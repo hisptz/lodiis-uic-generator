@@ -1,3 +1,34 @@
+const commands = {
+    actions: {
+        generate: 'generate',
+        update: 'update',
+        auto: 'auto',
+    },
+    periods: {
+        from: 'from',
+        to: 'to'
+    },
+    indexes: {
+      actionIndex: 2,
+      fromIndex: 3,
+      startDateIndex: 4,
+      toIndex: 5,
+      endDateIndex: 6
+    }
+}
+const appStatusOptions = {
+    running: 'RUNNING',
+    stopped: 'STOPPED',
+    underMaintenance: 'UNDER_MAINTENANCE'
+}
+const defaultStatusData = {
+    appStatus: appStatusOptions.running,
+    timeStarted: new Date(),
+}
+const appStatus = {
+    appStatusOptions: appStatusOptions,
+    defaultStatusData: defaultStatusData
+}
 const programTypes = {
   caregiver: 'CG',
   ovc: 'OVC',
@@ -22,6 +53,7 @@ const programs = [
     type: programTypes.dreams,
   },
 ];
+
 const metadata = {
   firstname: 'WTZ7GLTrE8Q',
   surname: 'rSP9c21JsfC',
@@ -74,9 +106,11 @@ const constants = {
   secondaryUICMetadataId: 'eIU7KMx4Tu3',
   metadata: metadata,
   requestResponse: requestResponse,
+    commands: commands,
   // primaryUICMetadataId: 'Lo44pBpt230',
   // secondaryUICMetadataId: 'I5gM3wN4Vsw',
   ageMetadataId: 'ls9hlz2tyol',
+    appStatus: appStatus
 };
 
 module.exports = {

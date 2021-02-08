@@ -4,8 +4,11 @@ const metadataConstants = constants.metadata;
 const programTypes = constants.programTypes;
 
 const _ = require('lodash');
-function getPrimaryUIC(ancestorOrgUnitName, orgUnitName, numberCounter, type) {
-  const ancestorNameSubString = ancestorOrgUnitName
+function getPrimaryUIC(ancestorOrgUnit, orgUnit, numberCounter, type) {
+  const  ancestorOrgUnitName = ancestorOrgUnit ? ancestorOrgUnit.replace(/\s/g,''): '';
+    const  orgUnitName = orgUnit ? orgUnit.replace(/\s/g,''): '';
+
+    const ancestorNameSubString = ancestorOrgUnitName
     ? ancestorOrgUnitName.substring(0, 3).toLocaleUpperCase()
     : '';
   const orgUnitNameSubString = orgUnitName

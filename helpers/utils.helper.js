@@ -21,6 +21,9 @@ function getDataPaginationFilters(paginationData, pageSize = 50) {
 function updateProcessStatus(status){
   console.log(status);
 }
+function printCreateStatusError() {
+  console.log('There was an error while setting up application status. Please try again later');
+}
 
 function generateSummary(payloads, responses, orgUnit) {
   let summaries = [];
@@ -89,5 +92,6 @@ module.exports = {
   incrementChar,
   getDataPaginationFilters,
   generateSummary,
-  updateProcessStatus
+  updateProcessStatus,
+  printCreateStatusError
 };
