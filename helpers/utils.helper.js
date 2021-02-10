@@ -87,11 +87,20 @@ function getAttributeSummaryColumns(attributes) {
   }
   return values;
 }
+function isValidDate(date) {
+  const timestamp = Date.parse(date);
+
+  if (isNaN(timestamp) === false) {
+     return true;
+  }
+  return false;
+}
 
 module.exports = {
   incrementChar,
   getDataPaginationFilters,
   generateSummary,
   updateProcessStatus,
-  printCreateStatusError
+  printCreateStatusError,
+  isValidDate
 };
