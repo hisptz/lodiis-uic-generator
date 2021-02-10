@@ -5,6 +5,7 @@ const utilsHelper = require('./utils.helper');
 const constants = constantsHelper.constants;
 const appStatus = constants.appStatus;
 const defaultAppStatusData = appStatus.defaultStatusData;
+const _ = require('lodash');
 async function getStatusConfiguration(headers, serverUrl) {
   let config = await getAppStatusConfiguration(headers, serverUrl);
   if (config) {
@@ -79,7 +80,33 @@ async function updateAppStatusConfiguration(headers, serverUrl, data) {
     return response;
   }
 }
+async function updateStatusFromCommand(headers, serverUrl, statusOption) {
+  const statuses = Object.keys(appStatus.appStatusOptions);
+  const selectedStatus = _.flattenDeep(_.map(statuses || [], statusItem => {
+       if(statusOption === appStatus.appStatusOptions[statusItem]) {
+          return statusOption;
+       }
+       return [];
+  }));
+  if(selectedStatus && selectedStatus.length ) {
+    const updateStatusResponse = await updateAppStatusConfiguration(headers, serverUrl, {
+      appStatus: statusOption,
+      timeUpdated: new Date()
+    });
+    if( updateStatusResponse &&
+        updateStatusResponse.httpStatusCode &&
+        updateStatusResponse.httpStatusCode >= 200 &&
+        updateStatusResponse.httpStatusCode < 300) {
+      console.log(`Status ${statusOption} updated successfully`);
+    } else {
+      console.log(`There was error while updating status ${statusOption}`);
+    }
+  } else {
+    console.log('Unknown app status');
+  }
+}
 module.exports = {
   getStatusConfiguration,
   updateAppStatusConfiguration,
+  updateStatusFromCommand
 };
