@@ -1,20 +1,34 @@
 const commands = {
     actions: {
-        generate: 'generate',
-        update: 'update',
-        auto: 'auto',
+        generate: {
+            name: 'generate',
+            indexes: {
+                fromIndex: 3,
+                startDateIndex: 4,
+                toIndex: 5,
+                endDateIndex: 6
+            }
+        },
+        update: {
+            name: 'update',
+            indexes: {
+                statusIndex: 3,
+                statusOptionIndex: 4
+            }
+        },
+        auto: {
+            name: 'auto',
+            indexes: {}
+        },
     },
     periods: {
         from: 'from',
         to: 'to'
     },
     indexes: {
-      actionIndex: 2,
-      fromIndex: 3,
-      startDateIndex: 4,
-      toIndex: 5,
-      endDateIndex: 6
+        actionIndex: 2,
     }
+
 }
 const appStatusOptions = {
     running: 'RUNNING',
