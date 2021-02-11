@@ -1,28 +1,47 @@
+const metadataConfig = require('../config/metadata-config');
+const metadata = metadataConfig.metadata;
+const programs = metadataConfig.programs;
 const commands = {
     actions: {
-        generate: 'generate',
-        update: 'update',
-        auto: 'auto',
+        generate: {
+            name: 'generate',
+            indexes: {
+                fromIndex: 3,
+                startDateIndex: 4,
+                toIndex: 5,
+                endDateIndex: 6
+            }
+        },
+        update: {
+            name: 'update',
+            indexes: {
+                statusIndex: 3,
+                statusOptionIndex: 4
+            }
+        },
+        auto: {
+            name: 'auto',
+            indexes: {}
+        },
     },
     periods: {
         from: 'from',
         to: 'to'
     },
     indexes: {
-      actionIndex: 2,
-      fromIndex: 3,
-      startDateIndex: 4,
-      toIndex: 5,
-      endDateIndex: 6
+        actionIndex: 2,
     }
+
 }
 const appStatusOptions = {
     running: 'RUNNING',
     stopped: 'STOPPED',
-    underMaintenance: 'UNDER_MAINTENANCE'
+    underMaintenance: 'UNDER_MAINTENANCE',
+    unknown: 'UNKNOWN',
+    started: 'STARTED'
 }
 const defaultStatusData = {
-    appStatus: appStatusOptions.running,
+    appStatus: appStatusOptions.started,
     timeStarted: new Date(),
 }
 const appStatus = {
@@ -34,33 +53,8 @@ const programTypes = {
   ovc: 'OVC',
   dreams: 'DRM',
 };
-const programs = [
-  {
-    id: 'BNsDaCclOiu',
-    childProgram: {
-      id: 'em38qztTI8s',
-      type: programTypes.ovc,
-    },
-    type: programTypes.caregiver,
-  },
-  {
-    id: 'em38qztTI8s',
-    type: programTypes.ovc,
-    isChild: true,
-  },
-  {
-    id: 'hOEIHJDrrvz',
-    type: programTypes.dreams,
-  },
-];
 
-const metadata = {
-  firstname: 'WTZ7GLTrE8Q',
-  surname: 'rSP9c21JsfC',
-  primaryUIC: 'fTSAY18LgCF',
-  secondaryUIC: 'eIU7KMx4Tu3',
-    age: 'ls9hlz2tyol',
-};
+
 const requestResponse = {
   summary: {
     columns: [
@@ -115,4 +109,5 @@ const constants = {
 
 module.exports = {
   constants,
+  programTypes
 };

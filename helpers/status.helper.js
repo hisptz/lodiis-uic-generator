@@ -5,44 +5,31 @@ const utilsHelper = require('./utils.helper');
 const constants = constantsHelper.constants;
 const appStatus = constants.appStatus;
 const defaultAppStatusData = appStatus.defaultStatusData;
+const _ = require('lodash');
 async function getStatusConfiguration(headers, serverUrl) {
-  const config = await getAppStatusConfiguration(headers, serverUrl);
-  let canAppContinue = false;
+  let config = await getAppStatusConfiguration(headers, serverUrl);
   if (config) {
     if (config.httpStatusCode && config.httpStatusCode >= 400) {
       if (config.httpStatusCode === 404) {
-        const createConfigResponse = createAppStatusConfiguration(
+        const createConfigResponse = await createAppStatusConfiguration(
           headers,
           serverUrl,
           defaultAppStatusData
         );
-        if (
-          (createConfigResponse && createConfigResponse.status === 'ERROR') ||
-          createConfigResponse.httpStatusCode >= 400
-        ) {
-          utilsHelper.printCreateStatusError();
-          canAppContinue = false;
-        }
+        config =
+          createConfigResponse &&
+          createConfigResponse.httpStatusCode &&
+          createConfigResponse.httpStatusCode >= 200 &&
+          createConfigResponse.httpStatusCode < 300
+            ? await getAppStatusConfiguration(headers, serverUrl)
+            : { appStatus: appStatus.appStatusOptions.unknown };
       } else {
         utilsHelper.printCreateStatusError();
-        canAppContinue = false;
-      }
-      canAppContinue = true;
-    } else {
-      if (
-        config.appStatus === appStatus.appStatusOptions.running ||
-        config.appStatus === appStatus.appStatusOptions.underMaintenance
-      ) {
-        canAppContinue = false;
-      } else {
-          await  updateAppStatusConfiguration(headers,serverUrl, defaultAppStatusData);
-          canAppContinue = true;
+        config = { appStatus: appStatus.appStatusOptions.unknown };
       }
     }
-  } else {
-      canAppContinue = false;
   }
-  return canAppContinue;
+  return config ? config : { appStatus: appStatus.appStatusOptions.unknown };
 }
 
 async function getAppStatusConfiguration(headers, serverUrl) {
@@ -93,7 +80,33 @@ async function updateAppStatusConfiguration(headers, serverUrl, data) {
     return response;
   }
 }
+async function updateStatusFromCommand(headers, serverUrl, statusOption) {
+  const statuses = Object.keys(appStatus.appStatusOptions);
+  const selectedStatus = _.flattenDeep(_.map(statuses || [], statusItem => {
+       if(statusOption === appStatus.appStatusOptions[statusItem]) {
+          return statusOption;
+       }
+       return [];
+  }));
+  if(selectedStatus && selectedStatus.length ) {
+    const updateStatusResponse = await updateAppStatusConfiguration(headers, serverUrl, {
+      appStatus: statusOption,
+      timeUpdated: new Date()
+    });
+    if( updateStatusResponse &&
+        updateStatusResponse.httpStatusCode &&
+        updateStatusResponse.httpStatusCode >= 200 &&
+        updateStatusResponse.httpStatusCode < 300) {
+      console.log(`Status ${statusOption} updated successfully`);
+    } else {
+      console.log(`There was error while updating status ${statusOption}`);
+    }
+  } else {
+    console.log('Unknown app status');
+  }
+}
 module.exports = {
   getStatusConfiguration,
-    updateAppStatusConfiguration
+  updateAppStatusConfiguration,
+  updateStatusFromCommand
 };
