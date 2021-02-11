@@ -1,3 +1,6 @@
+const metadataConfig = require('../config/metadata-config');
+const metadata = metadataConfig.metadata;
+const programs = metadataConfig.programs;
 const commands = {
     actions: {
         generate: {
@@ -50,33 +53,8 @@ const programTypes = {
   ovc: 'OVC',
   dreams: 'DRM',
 };
-const programs = [
-  {
-    id: 'BNsDaCclOiu',
-    childProgram: {
-      id: 'em38qztTI8s',
-      type: programTypes.ovc,
-    },
-    type: programTypes.caregiver,
-  },
-  {
-    id: 'em38qztTI8s',
-    type: programTypes.ovc,
-    isChild: true,
-  },
-  {
-    id: 'hOEIHJDrrvz',
-    type: programTypes.dreams,
-  },
-];
 
-const metadata = {
-  firstname: 'WTZ7GLTrE8Q',
-  surname: 'rSP9c21JsfC',
-  primaryUIC: 'fTSAY18LgCF',
-  secondaryUIC: 'eIU7KMx4Tu3',
-    age: 'ls9hlz2tyol',
-};
+
 const requestResponse = {
   summary: {
     columns: [
@@ -131,4 +109,5 @@ const constants = {
 
 module.exports = {
   constants,
+  programTypes
 };
