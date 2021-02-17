@@ -56,6 +56,10 @@ async function start() {
         await app.startApp(verifiedCommands);
         break;
       case appStatusOptions.stopped:
+        await statusHelper.updateAppStatusConfiguration(headers, serverUrl, {
+          appStatus: appStatusOptions.running,
+          timeStarted: new Date(),
+        });
         await app.startApp(verifiedCommands);
         break;
       case appStatusOptions.running:
