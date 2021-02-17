@@ -49,6 +49,7 @@ async function start() {
 
     switch (appConfigStatus) {
       case appStatusOptions.started:
+        console.log('Setting new status');
         await statusHelper.updateAppStatusConfiguration(headers, serverUrl, {
           appStatus: appStatusOptions.running,
           timeStarted: new Date(),
@@ -56,6 +57,7 @@ async function start() {
         await app.startApp(verifiedCommands);
         break;
       case appStatusOptions.stopped:
+        console.log('Setting new status');
         await statusHelper.updateAppStatusConfiguration(headers, serverUrl, {
           appStatus: appStatusOptions.running,
           timeStarted: new Date(),
