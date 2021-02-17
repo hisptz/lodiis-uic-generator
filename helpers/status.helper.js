@@ -7,6 +7,7 @@ const appStatus = constants.appStatus;
 const defaultAppStatusData = appStatus.defaultStatusData;
 const _ = require('lodash');
 async function getStatusConfiguration(headers, serverUrl) {
+  console.log('Getting application status');
   let config = await getAppStatusConfiguration(headers, serverUrl);
   if (config) {
     if (config.httpStatusCode && config.httpStatusCode >= 400) {
