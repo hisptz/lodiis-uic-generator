@@ -31,6 +31,7 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
       for (const filter of paginationFilters) {
         const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${dateLimits}&${filter}`;
         const response = await httpHelper.getHttp(headers, url);
+  
 
         trackedEntityInstances =
           response && response.trackedEntityInstances
