@@ -48,6 +48,9 @@ async function startApp(commands) {
         utilsHelper.updateProcessStatus(
           `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`
         );
+        await logsHelper.addLogs('INFO', `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`, 'App');
+        
+        
 
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
@@ -64,6 +67,7 @@ async function startApp(commands) {
           orgUnitName,
           payloads
         );
+        await logsHelper.addLogs('INFO', `Uploaded primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`, 'App');
 
         const summary = utilsHelper.generateSummary(
           payloads,

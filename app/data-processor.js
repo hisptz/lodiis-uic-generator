@@ -13,7 +13,13 @@ const utilsHelper = require('../helpers/utils.helper');
 const _ = require('lodash');
 const logsHelper = require('../helpers/logs.helper');
 
-async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit, startDate, endDate) {
+async function getTrackedEntityPayloadsByOrgUnit(
+  headers,
+  serverUrl,
+  orgUnit,
+  startDate,
+  endDate
+) {
   try {
     let trackedEntityInstancesByOrgUnitObj = {};
 
@@ -24,8 +30,8 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit, st
           serverUrl,
           orgUnit,
           program,
-            startDate,
-            endDate
+          startDate,
+          endDate
         );
 
         const programId = program && program.id ? program.id : '';
@@ -57,7 +63,14 @@ async function getTrackedEntityPayloadsByOrgUnit(headers, serverUrl, orgUnit, st
     );
   }
 }
-async function getTrackedEntityInstances(headers, serverUrl, orgUnit, program, startDate, endDate) {
+async function getTrackedEntityInstances(
+  headers,
+  serverUrl,
+  orgUnit,
+  program,
+  startDate,
+  endDate
+) {
   const orgUnitId = orgUnit && orgUnit.id ? orgUnit.id : '';
   const programId = program && program.id ? program.id : '';
   // const childProgramId = program && program.childProgram ? program.childProgram : '';
@@ -68,7 +81,8 @@ async function getTrackedEntityInstances(headers, serverUrl, orgUnit, program, s
       serverUrl,
       orgUnitId,
       programId,
-        startDate, endDate
+      startDate,
+      endDate
     );
 
     allTrackedEntityInstances = [...trackedEntityInstances];
@@ -133,9 +147,11 @@ function getParentWithChildrenFormattedPayloads(
     orgUnit
   );
 
-  return trackedEntityInstancesWithSecondaryUIC ? teiHelper.separateTeiParentFromChildren(
-    trackedEntityInstancesWithSecondaryUIC
-  ) : [];
+  return trackedEntityInstancesWithSecondaryUIC
+    ? teiHelper.separateTeiParentFromChildren(
+        trackedEntityInstancesWithSecondaryUIC
+      )
+    : [];
 }
 function getTeiParentsWithItsChildren(
   parentTrackedEntityInstances,
@@ -203,37 +219,58 @@ function getTrackedEntityInstancesWithSecondaryUIC(
   let teiCounter = secondaryUICHelper.getLastTeiSecondaryUICCounter(
     teiParentsWithItsChildren
   );
-  return _.flattenDeep( _.map(teiParentsWithItsChildren || [], (teiItem) => {
-    const attributes = teiItem && teiItem.attributes ? teiItem.attributes : [];
+  return _.flattenDeep(
+    _.map(teiParentsWithItsChildren || [], (teiItem) => {
+      const attributes =
+        teiItem && teiItem.attributes ? teiItem.attributes : [];
 
-    const secondaryUICAttribute = teiHelper.getAttributeObjectByIdFromTEI(
-      attributes,
-      metadataConstants.secondaryUIC
-    );
+      const secondaryUICAttribute = teiHelper.getAttributeObjectByIdFromTEI(
+        attributes,
+        metadataConstants.secondaryUIC
+      );
 
-    if (secondaryUICAttribute && secondaryUICAttribute.value) {
-      const existedTeiCounter = secondaryUICHelper.getNumberCounterFromSecondaryUIC(
-        secondaryUICAttribute.value
-      );
-      const children = getTeiChildrenWithSecondaryUIC(
-        teiItem,
-        existedTeiCounter,
-        orgUnit
-      );
-      if(teiItem && teiItem.hasOldPrimaryUIC && secondaryUICAttribute && secondaryUICAttribute.value) {
-        return [];
+      if (secondaryUICAttribute && secondaryUICAttribute.value) {
+        const existedTeiCounter = secondaryUICHelper.getNumberCounterFromSecondaryUIC(
+          secondaryUICAttribute.value
+        );
+        const children = getTeiChildrenWithSecondaryUIC(
+          teiItem,
+          existedTeiCounter,
+          orgUnit
+        );
+        if (
+          teiItem &&
+          teiItem.hasOldPrimaryUIC &&
+          secondaryUICAttribute &&
+          secondaryUICAttribute.value
+        ) {
+          
+           const childrenWithoutOldPrimaryUIC =  _.flattenDeep(
+              _.filter(children || [], (childItem) => {
+              //   const childItemAttributes =
+              //     childItem && childItem.attributes ? childItem.attributes : [];
+              //   const childItemPrimaryUIC = teiHelper.getAttributeValueByIdFromTEI(
+              //     childItemAttributes,
+              //     metadataConstants.primaryUIC
+              //   );
+                return childItem && childItem.hasOldPrimaryUIC ? [] : childItem;
+              })
+            );
+          
+          return {...teiItem, children: childrenWithoutOldPrimaryUIC};
+        }
+        return { ...teiItem, children };
       }
-      return { ...teiItem, children };
-    }
-    teiCounter = teiCounter + 1;
+      teiCounter = teiCounter + 1;
 
-    return generateTrackedEntityInstancesUICs(
-      teiItem,
-      teiCounter,
-      orgUnit,
-      programTypes.caregiver
-    );
-  }));
+      return generateTrackedEntityInstancesUICs(
+        teiItem,
+        teiCounter,
+        orgUnit,
+        programTypes.caregiver
+      );
+    })
+  );
 }
 function generateTrackedEntityInstancesUICs(
   tei,
@@ -262,7 +299,7 @@ function generateTrackedEntityInstancesUICs(
       orgUnit
     );
 
-    newTei =  { ...newTei, attributes, children: updatedChildren };
+    newTei = { ...newTei, attributes, children: updatedChildren };
     return newTei;
   } else if (type === programTypes.ovc) {
     const secondaryUIC = secondaryUICHelper.getSecondaryUIC(
@@ -328,6 +365,7 @@ function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
         attributes,
         metadataConstants.primaryUIC
       );
+      //   console.log(JSON.stringify({primaryUICAttribute, primaryUICMetadataId }))
       if (primaryUICAttribute) {
         return primaryUICHelper.getTeiPayloadWithOldPrimaryUIC(program, tei);
       }
@@ -342,6 +380,8 @@ function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
         ...attributes,
         { attribute: primaryUICMetadataId, value: primaryUIC },
       ];
+
+      //    console.log(JSON.stringify({primaryUICAttribute, primaryUICMetadataId, primaryUIC, }))
 
       return { ...tei, attributes };
     })
