@@ -21,6 +21,9 @@ function getDataPaginationFilters(paginationData, pageSize = 50) {
 function updateProcessStatus(status){
   console.log(status);
 }
+function printCreateStatusError() {
+  console.log('There was an error while setting up application status. Please try again later');
+}
 
 function generateSummary(payloads, responses, orgUnit) {
   let summaries = [];
@@ -84,10 +87,20 @@ function getAttributeSummaryColumns(attributes) {
   }
   return values;
 }
+function isValidDate(date) {
+  const timestamp = Date.parse(date);
+
+  if (isNaN(timestamp) === false) {
+     return true;
+  }
+  return false;
+}
 
 module.exports = {
   incrementChar,
   getDataPaginationFilters,
   generateSummary,
-  updateProcessStatus
+  updateProcessStatus,
+  printCreateStatusError,
+  isValidDate
 };

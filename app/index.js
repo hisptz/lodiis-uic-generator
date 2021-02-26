@@ -7,22 +7,27 @@ const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
 const logsHelper = require('../helpers/logs.helper');
 const utilsHelper = require('../helpers/utils.helper');
 const _ = require('lodash');
+const statusHelper = require('../helpers/status.helper');
 const dataProcessor = require('./data-processor');
 const dataUploader = require('./data-uploader');
 const filesManipulationHelper = require('../helpers/file-manipulation.helper');
 const dirName = 'files-folder';
-async function startApp() {
+const constants = constantsHelper.constants;
+const appStatus = constants.appStatus;
+async function startApp(commands) {
   const headers = await dhis2Util.getHttpAuthorizationHeader(
     config.sourceConfig.username,
     config.sourceConfig.password
   );
   try {
     // Get all org units require to retrieve data from programs
+    await logsHelper.addLogs('INFO', 'Fetching Community Councils','startApp');
     const orgUnitsForDataProcessing = await dataExtractor.getOrgUnitsForDataProcessing(
       headers,
       serverUrl,
       levelForDataProcessing
     );
+
 
     // orgUnitsForDataProcessing = _.filter(orgUnitsForDataProcessing || [], orgUnit => orgUnit.id === 'zbHbxA2SZ96');
 
@@ -32,18 +37,29 @@ async function startApp() {
       utilsHelper.updateProcessStatus(
         'Generating Primary and secondary UICs...'
       );
+      await logsHelper.addLogs('INFO', 'Generating Primary and secondary UICs');
+
+      let orgUnitIndex = 0;
 
       for (const orgUnit of orgUnitsForDataProcessing) {
+        orgUnitIndex = orgUnitIndex + 1;
         const orgUnitName = orgUnit && orgUnit.name ? orgUnit.name : '';
+        const startDate = commands && commands.from ? commands.from : '';
+        const endDate = commands && commands.to ? commands.to : '';
 
         utilsHelper.updateProcessStatus(
-          `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}`
+          `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`
         );
+        await logsHelper.addLogs('INFO', `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`, 'App');
+        
+        
 
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
           serverUrl,
-          orgUnit
+          orgUnit,
+            startDate,
+            endDate
         );
 
         const response = await dataUploader.uploadUpdatedTEIS(
@@ -53,6 +69,7 @@ async function startApp() {
           orgUnitName,
           payloads
         );
+        await logsHelper.addLogs('INFO', `Uploaded primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`, 'App');
 
         const summary = utilsHelper.generateSummary(
           payloads,
@@ -67,9 +84,19 @@ async function startApp() {
         `${dirName}/summary.xlsx`
       );
       console.log('Summary generated successfully');
+
+      await statusHelper.updateAppStatusConfiguration(headers,serverUrl, {
+        appStatus: appStatus.appStatusOptions.stopped,
+        timeStopped: new Date()
+      });
+
+    
+
       await logsHelper.addLogs('INFO', `End an app`, 'App');
     } else {
+      await logsHelper.addLogs('INFO', 'There is no Community Council present');
       console.log('There is no Community Council present');
+      await logsHelper.addLogs('INFO', `End an app`, 'App');
     }
   } catch (error) {
     console.log(error);
