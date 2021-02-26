@@ -17,7 +17,7 @@ async function getOrganisationUnitsFromServerByLevel(
   } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'getOrganisationUnitsFromServerByLevel'
     );
   } finally {

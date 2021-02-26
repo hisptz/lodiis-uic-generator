@@ -43,7 +43,7 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
     console.log(error);
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'getTrackedEntityInstanceByProgramAndOrgUnit'
     );
   } finally {
@@ -66,7 +66,7 @@ async function updateTrackedEntityInstances(headers, serverUrl, teis) {
   } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'updateTrackedEntityInstances'
     );
   }
@@ -82,7 +82,7 @@ async function getTeiPaginationData(headers, serverUrl, orgUnit, program, startD
   } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'getTrackedEntityInstanceByProgramAndOrgUnit'
     );
   } finally {

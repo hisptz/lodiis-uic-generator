@@ -69,6 +69,7 @@ async function startApp(commands) {
           orgUnitName,
           payloads
         );
+        await logsHelper.saveRawResponse(response);
         await logsHelper.addLogs('INFO', `Uploaded primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`, 'App');
 
         const summary = utilsHelper.generateSummary(
@@ -100,7 +101,7 @@ async function startApp(commands) {
     }
   } catch (error) {
     console.log(error);
-    await logsHelper.addLogs('ERROR', JSON.stringify(error), 'startApp');
+    await logsHelper.addLogs('ERROR', error.message || error, 'startApp');
   }
 }
 module.exports = {

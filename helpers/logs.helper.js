@@ -25,5 +25,17 @@ async function addLogs(type = 'INFO', message, resource = '') {
     return;
   }
 }
+async function saveRawResponse(data, orgUnitName = '') {
+  const rawResponseStr = _.isObjectLike(data) ? `${orgUnitName} \n ${JSON.stringify(data)}` : ''; 
+  const flag = 'a+';
+  const rawFileName = 'raw';
+  try {
+    await fileManipulation.writeToFile(dirFolder, rawFileName, `${rawResponseStr}\n\n`, false, flag);
+  } catch (error) {
+    console.log(data.replace('\n', ''));
+  } finally {
+    return;
+  }
+}
 
-module.exports = { clearLogs, addLogs };
+module.exports = { clearLogs, addLogs, saveRawResponse };
