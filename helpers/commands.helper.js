@@ -1,5 +1,6 @@
 const constantsHelper = require('./constants.helper');
 const utilsHelper = require('./utils.helper');
+const logsHelper = require('./logs.helper');
 const moment = require('moment');
 const constants = constantsHelper.constants;
 const commands = constants.commands;
@@ -78,7 +79,7 @@ function getVerifiedCommands(parameters) {
   return verifiedCommands;
 }
 
-function getVerifiedCommands1(parameters) {
+async function getVerifiedCommands1(parameters) {
   let verifiedCommands = {};
   if (parameters && parameters.length) {
     const actionParam =
@@ -114,6 +115,8 @@ function getVerifiedCommands1(parameters) {
                 'to'
             )
           : '';
+        
+         await logsHelper.addLogs('INFO', `COMMAND: update from ${from} to ${to}`);
         if(from === 'ERROR' || to === 'ERROR' || from === 'INVALID' || to === 'INVALID') {
           console.log('Invalid command or date specified');
           verifiedCommands = {...verifiedCommands, action: ''};
@@ -124,6 +127,7 @@ function getVerifiedCommands1(parameters) {
       case auto.name:
         from = moment().subtract(7, 'd').format('YYYY-MM-DD');
         to = moment().format('YYYY-MM-DD');
+        await logsHelper.addLogs('INFO', `COMMAND: auto`);
         break;
       case update.name:
 
@@ -132,6 +136,7 @@ function getVerifiedCommands1(parameters) {
         statusOption = actionTypeIndexes
           ? getUpdateCommand(parameters, actionTypeIndexes.statusIndex, actionTypeIndexes.statusOptionIndex)
           : '';
+          await logsHelper.addLogs('INFO', `COMMAND: update status ${statusOption}`);
         break;
         default:
             console.log('There is an error in a command, please review it and try again later');

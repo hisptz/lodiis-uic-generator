@@ -21,6 +21,7 @@ async function startApp(commands) {
   );
   try {
     // Get all org units require to retrieve data from programs
+    await logsHelper.addLogs('INFO', 'Fetching Community Councils','startApp');
     const orgUnitsForDataProcessing = await dataExtractor.getOrgUnitsForDataProcessing(
       headers,
       serverUrl,
@@ -36,6 +37,7 @@ async function startApp(commands) {
       utilsHelper.updateProcessStatus(
         'Generating Primary and secondary UICs...'
       );
+      await logsHelper.addLogs('INFO', 'Generating Primary and secondary UICs');
 
       let orgUnitIndex = 0;
 
@@ -88,9 +90,13 @@ async function startApp(commands) {
         timeStopped: new Date()
       });
 
+    
+
       await logsHelper.addLogs('INFO', `End an app`, 'App');
     } else {
+      await logsHelper.addLogs('INFO', 'There is no Community Council present');
       console.log('There is no Community Council present');
+      await logsHelper.addLogs('INFO', `End an app`, 'App');
     }
   } catch (error) {
     console.log(error);

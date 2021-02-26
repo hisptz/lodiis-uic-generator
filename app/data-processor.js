@@ -55,7 +55,6 @@ async function getTrackedEntityPayloadsByOrgUnit(
       return [];
     }
   } catch (error) {
-    console.log(error);
     await logsHelper.addLogs(
       'ERROR',
       JSON.stringify(error),
@@ -244,20 +243,23 @@ function getTrackedEntityInstancesWithSecondaryUIC(
           secondaryUICAttribute &&
           secondaryUICAttribute.value
         ) {
-          
-           const childrenWithoutOldPrimaryUIC =  _.flattenDeep(
-              _.filter(children || [], (childItem) => {
-              //   const childItemAttributes =
-              //     childItem && childItem.attributes ? childItem.attributes : [];
-              //   const childItemPrimaryUIC = teiHelper.getAttributeValueByIdFromTEI(
-              //     childItemAttributes,
-              //     metadataConstants.primaryUIC
-              //   );
-                return childItem && childItem.hasOldPrimaryUIC ? [] : childItem;
-              })
-            );
-          
-          return {...teiItem, children: childrenWithoutOldPrimaryUIC};
+          const childrenWithoutOldPrimaryUIC = _.flattenDeep(
+            _.filter(children || [], (childItem) => {
+              const childItemAttributes = teiHelper.getAttributesFromTEI(
+                childItem
+              );
+              return childItem &&
+                childItem.hasOldPrimaryUIC &&
+                teiHelper.getAttributeValueByIdFromTEI(
+                  childItemAttributes,
+                  metadataConstants.secondaryUIC
+                )
+                ? []
+                : childItem;
+            })
+          );
+
+          return { ...teiItem, children: childrenWithoutOldPrimaryUIC };
         }
         return { ...teiItem, children };
       }
