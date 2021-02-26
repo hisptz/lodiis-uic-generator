@@ -24,6 +24,10 @@ async function start() {
 
     const parameters = process.argv;
     const verifiedCommands = commandsHelper.getVerifiedCommands1(parameters);
+    const configStatusInfo = await statusHelper.getStatusConfiguration(
+      headers,
+      serverUrl
+    );
 
     if (
       verifiedCommands &&
@@ -38,10 +42,7 @@ async function start() {
       return;
     }
 
-    const configStatusInfo = await statusHelper.getStatusConfiguration(
-      headers,
-      serverUrl
-    );
+   
     const appConfigStatus =
       configStatusInfo && configStatusInfo.appStatus
         ? configStatusInfo.appStatus
