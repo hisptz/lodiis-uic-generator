@@ -14,7 +14,7 @@ async function clearLogs() {
   }
 }
 async function addLogs(type = 'INFO', message, resource = '') {
-  const time = moment().format('YYYY-MM-DD hh:mm:ss A');
+  const time = moment().utcOffset('+0200').format('YYYY-MM-DD hh:mm:ss A');
   const data = `${time} ${type}(${resource}) ${message}\n`;
   const flag = 'a+';
   try {

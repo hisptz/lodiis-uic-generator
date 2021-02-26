@@ -19,11 +19,12 @@ async function start() {
       config.sourceConfig.username,
       config.sourceConfig.password
     );
+    await logsHelper.clearLogs();
     updateProcessStatus('Starting script...');
     await logsHelper.addLogs('INFO', `Start an app`, 'App');
 
     const parameters = process.argv;
-    const verifiedCommands = commandsHelper.getVerifiedCommands1(parameters);
+    const verifiedCommands =  await commandsHelper.getVerifiedCommands1(parameters);
     const configStatusInfo = await statusHelper.getStatusConfiguration(
       headers,
       serverUrl
@@ -36,9 +37,11 @@ async function start() {
 
     ) {
       await statusHelper.updateStatusFromCommand(headers, serverUrl,  verifiedCommands.statusOption);
+      await logsHelper.addLogs('INFO', `End an app`, 'App');
       return;
     } else if(!verifiedCommands ||
         !verifiedCommands.action) {
+          await logsHelper.addLogs('INFO', `End an app`, 'App');
       return;
     }
 
