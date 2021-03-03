@@ -20,8 +20,10 @@ async function start() {
       config.sourceConfig.password
     );
     await logsHelper.clearLogs();
+    await logsHelper.deleteLogsConfiguration(headers,serverUrl,[]);
     updateProcessStatus('Starting script...');
     await logsHelper.addLogs('INFO', `Start an app`, 'App');
+    await logsHelper.updateAppLogsConfiguration(headers, serverUrl,'INFO', `Start an app`, 'App');
 
     const parameters = process.argv;
     const verifiedCommands = await commandsHelper.getVerifiedCommands(
@@ -93,5 +95,6 @@ async function start() {
   } catch (error) {
     console.log(error);
     await logsHelper.addLogs('ERROR', error.message || error, 'App');
+    await logsHelper.updateAppLogsConfiguration(headers, serverUrl,'ERROR', error.message || error, 'App');
   }
 }
