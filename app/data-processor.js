@@ -57,9 +57,10 @@ async function getTrackedEntityPayloadsByOrgUnit(
   } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'getTrackedEntityPayloadsByOrgUnit'
     );
+    
   }
 }
 async function getTrackedEntityInstances(

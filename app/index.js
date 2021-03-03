@@ -21,13 +21,19 @@ async function startApp(commands) {
   );
   try {
     // Get all org units require to retrieve data from programs
-    await logsHelper.addLogs('INFO', 'Fetching Community Councils','startApp');
+    await logsHelper.addLogs('INFO', 'Fetching Community Councils', 'startApp');
+    await logsHelper.updateAppLogsConfiguration(
+      headers,
+      serverUrl,
+      'INFO',
+      'Fetching Community Councils',
+      'startApp'
+    );
     const orgUnitsForDataProcessing = await dataExtractor.getOrgUnitsForDataProcessing(
       headers,
       serverUrl,
       levelForDataProcessing
     );
-
 
     // orgUnitsForDataProcessing = _.filter(orgUnitsForDataProcessing || [], orgUnit => orgUnit.id === 'zbHbxA2SZ96');
 
@@ -38,6 +44,13 @@ async function startApp(commands) {
         'Generating Primary and secondary UICs...'
       );
       await logsHelper.addLogs('INFO', 'Generating Primary and secondary UICs');
+      await logsHelper.updateAppLogsConfiguration(
+        headers,
+        serverUrl,
+        'INFO',
+        'Generating Primary and secondary UICs',
+        'startApp'
+      );
 
       let orgUnitIndex = 0;
 
@@ -50,16 +63,25 @@ async function startApp(commands) {
         utilsHelper.updateProcessStatus(
           `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`
         );
-        await logsHelper.addLogs('INFO', `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`, 'App');
-        
-        
+        await logsHelper.addLogs(
+          'INFO',
+          `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`,
+          'App'
+        );
+        await logsHelper.updateAppLogsConfiguration(
+          headers,
+          serverUrl,
+          'INFO',
+          `Generating primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`,
+          'App'
+        );
 
         const payloads = await dataProcessor.getTrackedEntityPayloadsByOrgUnit(
           headers,
           serverUrl,
           orgUnit,
-            startDate,
-            endDate
+          startDate,
+          endDate
         );
 
         const response = await dataUploader.uploadUpdatedTEIS(
@@ -69,7 +91,19 @@ async function startApp(commands) {
           orgUnitName,
           payloads
         );
-        await logsHelper.addLogs('INFO', `Uploaded primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`, 'App');
+        await logsHelper.saveRawResponse(response);
+        await logsHelper.addLogs(
+          'INFO',
+          `Uploaded primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`,
+          'App'
+        );
+        await logsHelper.updateAppLogsConfiguration(
+          headers,
+          serverUrl,
+          'INFO',
+          `Uploaded primary and secondary UICs for tracked Entity instances in ${orgUnitName}: ${orgUnitIndex}`,
+          'App'
+        );
 
         const summary = utilsHelper.generateSummary(
           payloads,
@@ -79,20 +113,41 @@ async function startApp(commands) {
         summaries = [...summaries, ...summary];
       }
       console.log('Generating summary...');
+      await logsHelper.addLogs('INFO', 'Generating summary...', 'App');
+      await logsHelper.updateAppLogsConfiguration(
+        headers,
+        serverUrl,
+        'INFO',
+        'Generating summary...',
+        'App'
+      );
       await filesManipulationHelper.writeToExcelFile(
         summaries,
         `${dirName}/summary.xlsx`
       );
       console.log('Summary generated successfully');
+      await logsHelper.addLogs('INFO', 'Summary generated successfully', 'App');
+      await logsHelper.updateAppLogsConfiguration(
+        headers,
+        serverUrl,
+        'INFO',
+        'Summary generated successfully',
+        'App'
+      );
 
-      await statusHelper.updateAppStatusConfiguration(headers,serverUrl, {
+      await statusHelper.updateAppStatusConfiguration(headers, serverUrl, {
         appStatus: appStatus.appStatusOptions.stopped,
-        timeStopped: new Date()
+        timeStopped: new Date(),
       });
 
-    
-
       await logsHelper.addLogs('INFO', `End an app`, 'App');
+      await logsHelper.updateAppLogsConfiguration(
+        headers,
+        serverUrl,
+        'INFO',
+        `End an app`,
+        'App'
+      );
     } else {
       await logsHelper.addLogs('INFO', 'There is no Community Council present');
       console.log('There is no Community Council present');
@@ -100,7 +155,7 @@ async function startApp(commands) {
     }
   } catch (error) {
     console.log(error);
-    await logsHelper.addLogs('ERROR', JSON.stringify(error), 'startApp');
+    await logsHelper.addLogs('ERROR', error.message || error, 'startApp');
   }
 }
 module.exports = {

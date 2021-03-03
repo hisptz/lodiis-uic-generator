@@ -10,8 +10,7 @@ async function getOrgUnitsForDataProcessing(headers, serverUrl, level) {
         level
     );
   } catch (error) {
-   
-   await logsHelper.addLogs('ERROR', JSON.stringify(error), 'getOrgUnitsForDataProcessing');
+   await logsHelper.addLogs('ERROR', error.message || error , 'getOrgUnitsForDataProcessing');
    return [];
   }
 }
