@@ -47,7 +47,7 @@ function getDateOfBirthString(dateOfBirth) {
     } catch(error) {
       await logsHelper.addLogs(
         'ERROR',
-        error.toString(),
+        error.message,
         'getDateOfBirthString'
       );
     }

@@ -57,7 +57,7 @@ async function getTrackedEntityPayloadsByOrgUnit(
       } catch (error) {
         await logsHelper.addLogs(
           'ERROR',
-          error.toString(),
+          error.message || error,
           'getTrackedEntityPayloadsByOrgUnit'
         );
       }
@@ -136,7 +136,7 @@ async function getFormattedTEIPayloadByProgramWithUIC(
   } catch(error) {
     await logsHelper.addLogs(
       'ERROR',
-      error.toString(),
+      error.message || error,
       'getFormattedTEIPayloadByProgramWithUIC'
     );
   }
@@ -370,7 +370,7 @@ async function getTeiChildrenWithSecondaryUIC(tei, teiParentCounter, orgUnit) {
   } catch(error) {
     await logsHelper.addLogs(
       'ERROR',
-      error.toString(),
+      error.message || error,
       'getTeiChildrenWithSecondaryUIC'
     );
   }
@@ -430,7 +430,7 @@ async function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
   } catch(error) {
     await logsHelper.addLogs(
       'ERROR',
-      error.toString(),
+      error.message || error,
       'getTeiWithPrimaryUIC'
     );
   }
