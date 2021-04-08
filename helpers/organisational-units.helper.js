@@ -8,7 +8,7 @@ async function getOrganisationUnitsFromServerByLevel(
 ) {
   let organisationUnits = [];
   try {
-    const url = `${serverUrl}/api/organisationUnits.json?fields=id,name,level,ancestors[id,name,level]&filter=level:eq:${level}&paging=false`;
+    const url = `${serverUrl}/api/organisationUnits.json?fields=id,name,level,code,ancestors[id,name,level]&filter=level:eq:${level}&paging=false`;
     const response = await httpHelper.getHttp(headers, url);
     organisationUnits =
       response && response.organisationUnits
@@ -27,6 +27,11 @@ async function getOrganisationUnitsFromServerByLevel(
 function getOrgUnitName(orgUnit) {
   return orgUnit && orgUnit.name ? orgUnit.name : '';
 }
+
+function getOrgUnitCode(orgUnit) {
+  return orgUnit && orgUnit.code ? orgUnit.code : '';
+}
+
 function getOrgUnitLevel(orgUnit) {
   return orgUnit && orgUnit.level ? orgUnit.level : '';
 }
@@ -39,6 +44,7 @@ function getOrgUnitAncestorByLevel(orgUnit, level) {
 module.exports = {
   getOrganisationUnitsFromServerByLevel,
   getOrgUnitName,
+  getOrgUnitCode,
   getOrgUnitLevel,
   getOrgUnitAncestorByLevel,
 };

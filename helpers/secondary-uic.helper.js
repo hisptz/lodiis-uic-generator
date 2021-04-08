@@ -1,13 +1,9 @@
 const constants = require('../helpers/constants.helper');
 const secondaryUICMetadataId = constants.constants.secondaryUICMetadataId;
 const _ = require('lodash');
-function getSecondaryUIC(orgUnitName, numberCounter, letterCounter) {
-  const orgUnitNameSubString = orgUnitName
-    ? orgUnitName.substring(0, 3).toLocaleUpperCase()
-    : '';
+function getSecondaryUIC(orgUnitCode, numberCounter, letterCounter) {
   const counterStr = addZerosToANumber(numberCounter);
-
-  return `${orgUnitNameSubString}${counterStr}${letterCounter}`;
+  return `${orgUnitCode.toLocaleUpperCase()}${counterStr}${letterCounter}`;
 }
 function addZerosToANumber(number) {
   if (number <= 99999) {

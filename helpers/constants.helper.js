@@ -98,6 +98,8 @@ const constants = {
   programTypes: programTypes,
   primaryUICMetadataId: 'fTSAY18LgCF',
   secondaryUICMetadataId: 'eIU7KMx4Tu3',
+  implementingPartnerMetadataId: 'klLkGxy328c',
+  dateOfBirthMetadataId: 'qZP982qpSPS',
   metadata: metadata,
   requestResponse: requestResponse,
     commands: commands,
