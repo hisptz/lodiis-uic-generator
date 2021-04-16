@@ -3,7 +3,7 @@ const secondaryUICMetadataId = constants.constants.secondaryUICMetadataId;
 const _ = require('lodash');
 function getSecondaryUIC(orgUnitCode, numberCounter, letterCounter) {
   const counterStr = addZerosToANumber(numberCounter);
-  return `${orgUnitCode.toLocaleUpperCase()}${counterStr}${letterCounter}`;
+  return `${orgUnitCode.toLocaleUpperCase().trim()}${counterStr}${letterCounter}`.trim();
 }
 function addZerosToANumber(number) {
   if (number <= 99999) {
@@ -44,17 +44,24 @@ function getLastTeiSecondaryUICCounter(trackedEntityInstances) {
 
   return _.max(secondaryUICCounters) ? _.max(secondaryUICCounters) : 0;
 }
-function getLastTeiSecondaryUICLetterCounter(trackedEntityInstances) {
-  const counters = _.flattenDeep(
-    _.map(trackedEntityInstances || [], (tei) => {
-      const secondaryUICAttributeObj = secondaryUICObj(tei);
-      return secondaryUICAttributeObj && secondaryUICAttributeObj.value
-        ? secondaryUICAttributeObj.value.substring(-1)
-        : '';
-    })
-  );
-
-  return counters && _.max(counters) ? _.max(counters) : 'A';
+async function getLastTeiSecondaryUICLetterCounter(trackedEntityInstances) {
+  try {
+    const counters = _.flattenDeep(
+      _.map(trackedEntityInstances || [], (tei) => {
+        const secondaryUICAttributeObj = secondaryUICObj(tei);
+        return secondaryUICAttributeObj && secondaryUICAttributeObj.value
+          ? secondaryUICAttributeObj.value.substring(-1)
+          : '';
+      })
+    );  
+    return counters && _.max(counters) ? _.max(counters) : 'A';
+  } catch(error) {
+    await logsHelper.addLogs(
+      "ERROR",
+      error.message || error,
+      "getLastTeiSecondaryUICLetterCounter"
+    );
+  }
 }
 
 module.exports = {

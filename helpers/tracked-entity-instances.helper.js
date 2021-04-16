@@ -1,17 +1,21 @@
-const httpHelper = require('./http.helper');
-const utilsHelper = require('./utils.helper');
-const logsHelper = require('./logs.helper');
-const _ = require('lodash');
+const httpHelper = require("./http.helper");
+const utilsHelper = require("./utils.helper");
+const logsHelper = require("./logs.helper");
+const _ = require("lodash");
 async function getTrackedEntityInstanceByProgramAndOrgUnit(
   headers,
   serverUrl,
   orgUnit,
   program,
-  startDate, endDate
+  startDate,
+  endDate
 ) {
   let trackedEntityInstances = [];
   try {
-    const dateLimits = startDate || endDate ? `lastUpdatedStartDate=${startDate}&lastUpdatedEndDate=${endDate}`: '';
+    const dateLimits =
+      startDate || endDate
+        ? `lastUpdatedStartDate=${startDate}&lastUpdatedEndDate=${endDate}`
+        : "";
     const enrollmentFields = `enrollments[enrollment,program,enrollmentDate]`;
     const fields = `fields=orgUnit,trackedEntityInstance,relationships,${enrollmentFields},attributes[attribute,value],created`;
 
@@ -20,18 +24,15 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
       serverUrl,
       orgUnit,
       program,
-        startDate,
-        endDate
+      startDate,
+      endDate
     );
-    const paginationFilters = getDataPaginationFilters(
-      paginationData, 50
-    );
+    const paginationFilters = getDataPaginationFilters(paginationData, 50);
 
     if (paginationFilters && paginationFilters.length) {
       for (const filter of paginationFilters) {
         const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${dateLimits}&${filter}`;
         const response = await httpHelper.getHttp(headers, url);
-  
 
         trackedEntityInstances =
           response && response.trackedEntityInstances
@@ -42,9 +43,9 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
   } catch (error) {
     console.log(error);
     await logsHelper.addLogs(
-      'ERROR',
+      "ERROR",
       error.message || error,
-      'getTrackedEntityInstanceByProgramAndOrgUnit'
+      "getTrackedEntityInstanceByProgramAndOrgUnit"
     );
   } finally {
     return trackedEntityInstances;
@@ -65,25 +66,35 @@ async function updateTrackedEntityInstances(headers, serverUrl, teis) {
     return updateResponse;
   } catch (error) {
     await logsHelper.addLogs(
-      'ERROR',
+      "ERROR",
       error.message || error,
-      'updateTrackedEntityInstances'
+      "updateTrackedEntityInstances"
     );
   }
 }
-async function getTeiPaginationData(headers, serverUrl, orgUnit, program, startDate, endDate) {
+async function getTeiPaginationData(
+  headers,
+  serverUrl,
+  orgUnit,
+  program,
+  startDate,
+  endDate
+) {
   let paginationData = null;
   try {
-    const dateLimits = startDate || endDate ? `lastUpdatedStartDate=${startDate}&lastUpdatedEndDate=${endDate}`: '';
+    const dateLimits =
+      startDate || endDate
+        ? `lastUpdatedStartDate=${startDate}&lastUpdatedEndDate=${endDate}`
+        : "";
     const pageOptions = `totalPages=true&pageSize=1&fields=none`;
     const url = `${serverUrl}/api/trackedEntityInstances.json?ou=${orgUnit}&program=${program}&${dateLimits}&${pageOptions}`;
     const response = await httpHelper.getHttp(headers, url);
     paginationData = response;
   } catch (error) {
     await logsHelper.addLogs(
-      'ERROR',
+      "ERROR",
       error.message || error,
-      'getTrackedEntityInstanceByProgramAndOrgUnit'
+      "getTrackedEntityInstanceByProgramAndOrgUnit"
     );
   } finally {
     return paginationData;
@@ -103,46 +114,65 @@ function getAttributeValueByIdFromTEI(attributes, attributeId) {
     attributes || [],
     (attributeItem) => attributeItem.attribute === attributeId
   );
-  return attributeObj && attributeObj.value ? attributeObj.value : '';
+  return attributeObj && attributeObj.value ? attributeObj.value : "";
 }
 function sortTeiArrayByEnrollmentDate(trackedEntityInstances, programId) {
- return _.sortBy(
-      trackedEntityInstances || [],
-      (instance) => {
-        const enrollment = _.find(
-            instance.enrollments || [],
-            (enrolmentItem) => enrolmentItem.program === programId
-        );
-        return new Date(enrollment.enrollmentDate);
-      }
-  );
-}
-function sortTeiArrayByAge(trackedEntityInstances, ageMetadataId) {
-  return trackedEntityInstances && trackedEntityInstances.length
-      ? _.sortBy(trackedEntityInstances || [], (tei) => {
-    const childAgeAttribute = getAttributeValueByIdFromTEI(tei.attributes, ageMetadataId);
-    return childAgeAttribute && childAgeAttribute.value
-        ? parseInt(childAgeAttribute.value, 10)
-        : 0;
-  }).reverse(): [];
-}
-function separateTeiParentFromChildren(trackedEntityInstances) {
-  let childrenTeiPayloads = [];
-  const parentTeiPayloads = _.map(trackedEntityInstances || [], (tei) => {
-    childrenTeiPayloads =
-        tei && tei.children
-            ? [...childrenTeiPayloads, ...tei.children]
-            : [...childrenTeiPayloads];
-    delete tei.children;
-    return tei;
+  return _.sortBy(trackedEntityInstances || [], (instance) => {
+    const enrollment = _.find(
+      instance.enrollments || [],
+      (enrolmentItem) => enrolmentItem.program === programId
+    );
+    return new Date(enrollment.enrollmentDate);
   });
-  return childrenTeiPayloads.concat(parentTeiPayloads);
+}
+async function sortTeiArrayByAge(trackedEntityInstances, ageMetadataId) {
+  try {
+    return trackedEntityInstances && trackedEntityInstances.length
+      ? _.sortBy(trackedEntityInstances || [], (tei) => {
+          const childAgeAttribute = getAttributeValueByIdFromTEI(
+            tei.attributes,
+            ageMetadataId
+          );
+          return childAgeAttribute && childAgeAttribute.value
+            ? parseInt(childAgeAttribute.value, 10)
+            : 0;
+        }).reverse()
+      : [];
+  } catch (error) {
+    await logsHelper.addLogs(
+      "ERROR",
+      error.message || error,
+      "sortTeiArrayByAge"
+    );
+    return [];
+  }
+}
+async function separateTeiParentFromChildren(trackedEntityInstances) {
+  try {
+    let childrenTeiPayloads = [];
+    const parentTeiPayloads = _.map(trackedEntityInstances || [], (tei) => {
+      childrenTeiPayloads =
+        tei && tei.children
+          ? [...childrenTeiPayloads, ...tei.children]
+          : [...childrenTeiPayloads];
+      delete tei.children;
+      return tei;
+    });
+    return childrenTeiPayloads.concat(parentTeiPayloads);
+  } catch (error) {
+    await logsHelper.addLogs(
+      "ERROR",
+      error.message || error,
+      "separateTeiParentFromChildren"
+    );
+    return [];
+  }
 }
 function getDataPaginationFilters(paginationData, pageSize = 50) {
   const paginationFilter = [];
 
   const pager =
-      paginationData && paginationData.pager ? paginationData.pager : {};
+    paginationData && paginationData.pager ? paginationData.pager : {};
   const total = pager && pager.total >= pageSize ? pager.total : pageSize;
   for (let page = 1; page <= Math.ceil(total / pageSize); page++) {
     paginationFilter.push(`totalPages=true&pageSize=${pageSize}&page=${page}`);
@@ -158,5 +188,5 @@ module.exports = {
   getAttributesFromTEI,
   sortTeiArrayByEnrollmentDate,
   sortTeiArrayByAge,
-  separateTeiParentFromChildren
+  separateTeiParentFromChildren,
 };
