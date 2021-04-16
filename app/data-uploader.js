@@ -26,7 +26,7 @@ async function uploadUpdatedTEIS(
     console.log(error);
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'uploadUpdatedTEIS'
     );
     return null;

@@ -41,7 +41,7 @@ async function getAppStatusConfiguration(headers, serverUrl) {
   } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'getAppStatusConfiguration'
     );
     response = error;
@@ -57,7 +57,7 @@ async function createAppStatusConfiguration(headers, serverUrl, data) {
   } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'createAppStatusConfiguration'
     );
     response = error;
@@ -73,7 +73,7 @@ async function updateAppStatusConfiguration(headers, serverUrl, data) {
   } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'createAppStatusConfiguration'
     );
     response = error;

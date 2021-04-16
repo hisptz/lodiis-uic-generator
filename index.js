@@ -20,11 +20,15 @@ async function start() {
       config.sourceConfig.password
     );
     await logsHelper.clearLogs();
+    await logsHelper.deleteLogsConfiguration(headers,serverUrl,[]);
     updateProcessStatus('Starting script...');
     await logsHelper.addLogs('INFO', `Start an app`, 'App');
+    await logsHelper.updateAppLogsConfiguration(headers, serverUrl,'INFO', `Start an app`, 'App');
 
     const parameters = process.argv;
-    const verifiedCommands =  await commandsHelper.getVerifiedCommands1(parameters);
+    const verifiedCommands = await commandsHelper.getVerifiedCommands(
+      parameters
+    );
     const configStatusInfo = await statusHelper.getStatusConfiguration(
       headers,
       serverUrl
@@ -34,18 +38,19 @@ async function start() {
       verifiedCommands &&
       verifiedCommands.action &&
       verifiedCommands.action === actions.update.name
-
     ) {
-      await statusHelper.updateStatusFromCommand(headers, serverUrl,  verifiedCommands.statusOption);
+      await statusHelper.updateStatusFromCommand(
+        headers,
+        serverUrl,
+        verifiedCommands.statusOption
+      );
       await logsHelper.addLogs('INFO', `End an app`, 'App');
       return;
-    } else if(!verifiedCommands ||
-        !verifiedCommands.action) {
-          await logsHelper.addLogs('INFO', `End an app`, 'App');
+    } else if (!verifiedCommands || !verifiedCommands.action) {
+      await logsHelper.addLogs('INFO', `End an app`, 'App');
       return;
     }
 
-   
     const appConfigStatus =
       configStatusInfo && configStatusInfo.appStatus
         ? configStatusInfo.appStatus
@@ -89,6 +94,7 @@ async function start() {
     // await app.startApp(verifiedCommands);
   } catch (error) {
     console.log(error);
-    await logsHelper.addLogs('ERROR', JSON.stringify(error), 'App');
+    await logsHelper.addLogs('ERROR', error.message || error, 'App');
+    await logsHelper.updateAppLogsConfiguration(headers, serverUrl,'ERROR', error.message || error, 'App');
   }
 }

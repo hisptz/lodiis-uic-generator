@@ -70,7 +70,7 @@ async function writeMappedFormDataToTheFile(dir, formMapping) {
   } catch (error) {
     await logsHelper.addLogs(
       'ERROR',
-      JSON.stringify(error),
+      error.message || error,
       'writeMappedFormDataToTheFile'
     );
   } finally {
