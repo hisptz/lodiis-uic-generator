@@ -1,11 +1,12 @@
-const moment = require('moment');
-const fileManipulation = require('./file-manipulation.helper');
-const fileName = 'logs';
-const dirFolder = 'logs';
-const httpHelper = require('./http.helper');
+const moment = require("moment");
+const fileManipulation = require("./file-manipulation.helper");
+const fileName = "logs";
+const dirFolder = "logs";
+const httpHelper = require("./http.helper");
+const _ = require("lodash");
 
 async function clearLogs() {
-  const data = '';
+  const data = "";
   try {
     await fileManipulation.writeToFile(dirFolder, fileName, data, false);
   } catch (error) {
@@ -14,24 +15,24 @@ async function clearLogs() {
     return;
   }
 }
-async function addLogs(type = 'INFO', message, resource = '') {
-  const time = moment().utcOffset('+0200').format('YYYY-MM-DD hh:mm:ss A');
+async function addLogs(type = "INFO", message, resource = "") {
+  const time = moment().utcOffset("+0200").format("YYYY-MM-DD hh:mm:ss A");
   const data = `${time} ${type}(${resource}) ${message}\n`;
-  const flag = 'a+';
+  const flag = "a+";
   try {
     await fileManipulation.writeToFile(dirFolder, fileName, data, false, flag);
   } catch (error) {
-    console.log(data.replace('\n', ''));
+    console.log(data.replace("\n", ""));
   } finally {
     return;
   }
 }
-async function saveRawResponse(data, orgUnitName = '') {
+async function saveRawResponse(data, orgUnitName = "") {
   const rawResponseStr = _.isObjectLike(data)
     ? `${orgUnitName} \n ${JSON.stringify(data)}`
-    : '';
-  const flag = 'a+';
-  const rawFileName = 'raw';
+    : "";
+  const flag = "a+";
+  const rawFileName = "raw";
   try {
     await fileManipulation.writeToFile(
       dirFolder,
@@ -41,7 +42,7 @@ async function saveRawResponse(data, orgUnitName = '') {
       flag
     );
   } catch (error) {
-    console.log(data.replace('\n', ''));
+    console.log(data.replace("\n", ""));
   } finally {
     return;
   }
@@ -49,17 +50,17 @@ async function saveRawResponse(data, orgUnitName = '') {
 async function updateAppLogsConfiguration(
   headers,
   serverUrl,
-  type = 'INFO',
+  type = "INFO",
   message,
-  resource = ''
+  resource = ""
 ) {
   let config = await getLogsConfiguration(headers, serverUrl);
   if (config) {
     if (config.httpStatusCode && config.httpStatusCode >= 400) {
       if (config.httpStatusCode === 404) {
         const time = moment()
-          .utcOffset('+0200')
-          .format('YYYY-MM-DD hh:mm:ss A');
+          .utcOffset("+0200")
+          .format("YYYY-MM-DD hh:mm:ss A");
         const data = `${time} ${type}(${resource}) ${message}\n`;
         const createConfigResponse = await createLogsConfiguration(
           headers,
@@ -73,13 +74,13 @@ async function updateAppLogsConfiguration(
         );
       } else {
         addLogs(
-          'INFO',
-          'Failed to update status in data store',
-          'updateAppLogsConfiguration'
+          "INFO",
+          "Failed to update status in data store",
+          "updateAppLogsConfiguration"
         );
       }
     } else {
-      const time = moment().utcOffset('+0200').format('YYYY-MM-DD hh:mm:ss A');
+      const time = moment().utcOffset("+0200").format("YYYY-MM-DD hh:mm:ss A");
       const data = `${time} ${type}(${resource}) ${message}`;
       config = [
         ...config,
@@ -104,9 +105,9 @@ async function getLogsConfiguration(headers, serverUrl) {
     response = await httpHelper.getHttp(headers, url);
   } catch (error) {
     await logsHelper.addLogs(
-      'ERROR',
+      "ERROR",
       error.message || error,
-      'getLogsConfiguration'
+      "getLogsConfiguration"
     );
     response = error;
   } finally {
@@ -120,9 +121,9 @@ async function createLogsConfiguration(headers, serverUrl, data) {
     response = await httpHelper.postHttp(headers, url, data);
   } catch (error) {
     await logsHelper.addLogs(
-      'ERROR',
+      "ERROR",
       error.message || error,
-      'createLogsConfiguration'
+      "createLogsConfiguration"
     );
     response = error;
   } finally {
@@ -136,9 +137,9 @@ async function updateLogsConfiguration(headers, serverUrl, data) {
     response = await httpHelper.putHttp(headers, url, data);
   } catch (error) {
     await logsHelper.addLogs(
-      'ERROR',
+      "ERROR",
       error.message || error,
-      'updateAppLogsConfiguration'
+      "updateAppLogsConfiguration"
     );
     response = error;
   } finally {
@@ -152,9 +153,9 @@ async function deleteLogsConfiguration(headers, serverUrl, data = []) {
     response = await httpHelper.deleteHttp(headers, url, data);
   } catch (error) {
     await logsHelper.addLogs(
-      'ERROR',
+      "ERROR",
       error.message || error,
-      'deleteLogsConfiguration'
+      "deleteLogsConfiguration"
     );
     response = error;
   } finally {
