@@ -2,6 +2,7 @@ const _ = require("lodash");
 const constantsHelper = require("./constants.helper");
 const logsHelper = require("../helpers/logs.helper");
 const constants = constantsHelper.constants;
+const primaryUICMetadataId = constants.primaryUICMetadataId;
 const metadataConstants = constants.metadata;
 const programTypes = constants.programTypes;
 
@@ -29,7 +30,9 @@ async function getPrimaryUIC(
       ? "KB"
       : getImplementingPartnerString(implementingPartner);
 
-  return `${dateOfBirthStr}${ancestorNameSubString}${orgUnitCode.toLocaleUpperCase().trim()}${type}${counterStr}${implementingPartnerStr}`.trim();
+  return `${dateOfBirthStr}${ancestorNameSubString}${orgUnitCode
+    .toLocaleUpperCase()
+    .trim()}${type}${counterStr}${implementingPartnerStr}`.trim();
 }
 
 function addZerosToANumber(number) {
@@ -103,13 +106,20 @@ function getLastTeiPrimaryUICCounter(trackedEntityInstances) {
   return _.max(primaryUICCounters) ? _.max(primaryUICCounters) : 0;
 }
 function getTeiPayloadWithOldPrimaryUIC(program, tei) {
+  const sanitizedTei = {
+    ...tei,
+    attributes: _.filter(
+      tei.attributes || [],
+      (teiAttribute) => teiAttribute.attribute === primaryUICMetadataId
+    ),
+  };
   if (program) {
     if (program.type === programTypes.dreams) {
       return [];
     } else if (program.type === programTypes.caregiver) {
-      return { ...tei, hasOldPrimaryUIC: true };
+      return { ...sanitizedTei, hasOldPrimaryUIC: true };
     } else if (program.type === programTypes.ovc) {
-      return { ...tei, hasOldPrimaryUIC: true };
+      return { ...sanitizedTei, hasOldPrimaryUIC: true };
     } else {
       return [];
     }
