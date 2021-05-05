@@ -324,7 +324,7 @@ async function generateTrackedEntityInstancesUICs(
   letterCount = ""
 ) {
   let newTei = {
-    ...tei,
+    trackedEntityInstance: tei.trackedEntityInstance,
     attributes: _.filter(
       tei.attributes || [],
       (teiAttribute) =>
@@ -457,7 +457,10 @@ async function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
             implementingPartner
           );
           attributes = [{ attribute: primaryUICMetadataId, value: primaryUIC }];
-          return { ...tei, attributes };
+          return {
+            trackedEntityInstance: tei.trackedEntityInstance || "",
+            attributes,
+          };
         })
       )
     );
