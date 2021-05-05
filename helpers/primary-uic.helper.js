@@ -42,7 +42,7 @@ function addZerosToANumber(number) {
   return number;
 }
 function getImplementingPartnerString(implementingPartner) {
-  return implementingPartner.split("-")[0].toLocaleUpperCase();
+  return _.snakeCase(implementingPartner).split("_")[0].toLocaleUpperCase();
 }
 
 async function getDoubleDigitNumber(number) {
