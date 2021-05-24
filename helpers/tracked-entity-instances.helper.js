@@ -31,7 +31,7 @@ async function getTrackedEntityInstanceByProgramAndOrgUnit(
 
     if (paginationFilters && paginationFilters.length) {
       for (const filter of paginationFilters) {
-        const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${dateLimits}&${filter}`;
+        const url = `${serverUrl}/api/trackedEntityInstances.json?${fields}&ou=${orgUnit}&program=${program}&${dateLimits}&${filter}ouMode=DESCENDANTS`;
         const response = await httpHelper.getHttp(headers, url);
 
         trackedEntityInstances =
@@ -63,7 +63,6 @@ async function updateTrackedEntityInstances(headers, serverUrl, teis) {
       });
       updateResponse.push(response);
     }
-    return updateResponse;
   } catch (error) {
     await logsHelper.addLogs(
       "ERROR",
@@ -71,6 +70,7 @@ async function updateTrackedEntityInstances(headers, serverUrl, teis) {
       "updateTrackedEntityInstances"
     );
   }
+  return _.flattenDeep(updateResponse);
 }
 async function getTeiPaginationData(
   headers,
