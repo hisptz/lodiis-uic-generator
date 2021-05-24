@@ -37,13 +37,16 @@ async function getTrackedEntityPayloadsByOrgUnit(
             endDate
           );
 
+          console.log(`${program.id}:: ${trackedEntityInstances.length}`);
+
           const programId = program && program.id ? program.id : "";
 
-          const trackedEntityInstancesWithPrimaryUICs = await getTeiWithPrimaryUIC(
-            trackedEntityInstances,
-            orgUnit,
-            program
-          );
+          const trackedEntityInstancesWithPrimaryUICs =
+            await getTeiWithPrimaryUIC(
+              trackedEntityInstances,
+              orgUnit,
+              program
+            );
           trackedEntityInstancesByOrgUnitObj = {
             ...trackedEntityInstancesByOrgUnitObj,
             [programId]: trackedEntityInstancesWithPrimaryUICs,
@@ -85,14 +88,15 @@ async function getTrackedEntityInstances(
   // const childProgramId = program && program.childProgram ? program.childProgram : '';
   let allTrackedEntityInstances = [];
   if (programId && orgUnitId) {
-    const trackedEntityInstances = await teiHelper.getTrackedEntityInstanceByProgramAndOrgUnit(
-      headers,
-      serverUrl,
-      orgUnitId,
-      programId,
-      startDate,
-      endDate
-    );
+    const trackedEntityInstances =
+      await teiHelper.getTrackedEntityInstanceByProgramAndOrgUnit(
+        headers,
+        serverUrl,
+        orgUnitId,
+        programId,
+        startDate,
+        endDate
+      );
 
     allTrackedEntityInstances = [...trackedEntityInstances];
   }
@@ -159,10 +163,11 @@ async function getParentWithChildrenFormattedPayloads(
       parentTrackedEntityInstances,
       childTrackedEntityInstances
     );
-    const trackedEntityInstancesWithSecondaryUIC = await getTrackedEntityInstancesWithSecondaryUIC(
-      teiParentsWithItsChildren,
-      orgUnit
-    );
+    const trackedEntityInstancesWithSecondaryUIC =
+      await getTrackedEntityInstancesWithSecondaryUIC(
+        teiParentsWithItsChildren,
+        orgUnit
+      );
 
     return trackedEntityInstancesWithSecondaryUIC
       ? await teiHelper.separateTeiParentFromChildren(
@@ -270,9 +275,10 @@ async function getTrackedEntityInstancesWithSecondaryUIC(
           metadataConstants.secondaryUIC
         );
         if (secondaryUICAttribute && secondaryUICAttribute.value) {
-          const existedTeiCounter = secondaryUICHelper.getNumberCounterFromSecondaryUIC(
-            secondaryUICAttribute.value
-          );
+          const existedTeiCounter =
+            secondaryUICHelper.getNumberCounterFromSecondaryUIC(
+              secondaryUICAttribute.value
+            );
           const children = await getTeiChildrenWithSecondaryUIC(
             teiItem,
             existedTeiCounter,
@@ -286,9 +292,8 @@ async function getTrackedEntityInstancesWithSecondaryUIC(
           ) {
             const childrenWithoutOldPrimaryUIC = _.flattenDeep(
               _.filter(children || [], (childItem) => {
-                const childItemAttributes = teiHelper.getAttributesFromTEI(
-                  childItem
-                );
+                const childItemAttributes =
+                  teiHelper.getAttributesFromTEI(childItem);
                 return childItem &&
                   childItem.hasOldPrimaryUIC &&
                   teiHelper.getAttributeValueByIdFromTEI(
@@ -373,14 +378,12 @@ async function getTeiChildrenWithSecondaryUIC(tei, teiParentCounter, orgUnit) {
   const updatedChildren = [];
   try {
     const children = tei && tei.children ? tei.children : [];
-    let letterCounter = await secondaryUICHelper.getLastTeiSecondaryUICLetterCounter(
-      children
-    );
+    let letterCounter =
+      await secondaryUICHelper.getLastTeiSecondaryUICLetterCounter(children);
     if (children && children.length) {
       for (const child of children) {
-        const childSecondaryUICAttribute = secondaryUICHelper.secondaryUICObj(
-          child
-        );
+        const childSecondaryUICAttribute =
+          secondaryUICHelper.secondaryUICObj(child);
         letterCounter =
           childSecondaryUICAttribute && childSecondaryUICAttribute.value
             ? letterCounter
@@ -425,9 +428,8 @@ async function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
             orgUnit,
             ancestorOrgUnitLevel
           );
-          const ancestorOrgUnitName = orgUnitHelper.getOrgUnitName(
-            ancestorOrgUnit
-          );
+          const ancestorOrgUnitName =
+            orgUnitHelper.getOrgUnitName(ancestorOrgUnit);
           const primaryUICAttribute = teiHelper.getAttributeValueByIdFromTEI(
             attributes,
             metadataConstants.primaryUIC
@@ -459,6 +461,7 @@ async function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
           attributes = [{ attribute: primaryUICMetadataId, value: primaryUIC }];
           return {
             trackedEntityInstance: tei.trackedEntityInstance || "",
+            orgUnit: tei.orgUnit,
             attributes,
           };
         })
