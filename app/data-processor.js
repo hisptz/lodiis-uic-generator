@@ -36,9 +36,6 @@ async function getTrackedEntityPayloadsByOrgUnit(
             startDate,
             endDate
           );
-
-          console.log(`${program.id}:: ${trackedEntityInstances.length}`);
-
           const programId = program && program.id ? program.id : "";
 
           const trackedEntityInstancesWithPrimaryUICs =
