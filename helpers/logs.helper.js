@@ -27,12 +27,10 @@ async function addLogs(type = "INFO", message, resource = "") {
     return;
   }
 }
-async function saveRawResponse(data, orgUnitName = "") {
-  const rawResponseStr = _.isObjectLike(data)
-    ? `${orgUnitName} \n ${JSON.stringify(data)}`
-    : "";
-  const flag = "a+";
-  const rawFileName = "raw";
+async function saveToTextFile(data, fileName) {
+  const rawResponseStr = _.isObjectLike(data) ? `${JSON.stringify(data)}` : "";
+  const flag = "w";
+  const rawFileName = `${fileName}`;
   try {
     await fileManipulation.writeToFile(
       dirFolder,
@@ -166,7 +164,7 @@ async function deleteLogsConfiguration(headers, serverUrl, data = []) {
 module.exports = {
   clearLogs,
   addLogs,
-  saveRawResponse,
+  saveToTextFile,
   updateAppLogsConfiguration,
   deleteLogsConfiguration,
 };
