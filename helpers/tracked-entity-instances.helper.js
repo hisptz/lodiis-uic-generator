@@ -87,7 +87,7 @@ async function getTeiPaginationData(
         ? `lastUpdatedStartDate=${startDate}&lastUpdatedEndDate=${endDate}`
         : "";
     const pageOptions = `totalPages=true&pageSize=1&fields=none`;
-    const url = `${serverUrl}/api/trackedEntityInstances.json?ou=${orgUnit}&program=${program}&${dateLimits}&${pageOptions}`;
+    const url = `${serverUrl}/api/trackedEntityInstances.json?ou=${orgUnit}&program=${program}&${dateLimits}&${pageOptions}&ouMode=DESCENDANTS`;
     const response = await httpHelper.getHttp(headers, url);
     paginationData = response;
   } catch (error) {
