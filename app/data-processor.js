@@ -441,7 +441,10 @@ async function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
             attributes,
             implementingPartnerMetadataId
           );
-          //   console.log(JSON.stringify({primaryUICAttribute, primaryUICMetadataId }))
+          const secondaryUIC = teiHelper.getAttributeValueByIdFromTEI(
+            attributes,
+            secondaryUICMetadataId
+          );
           if (primaryUICAttribute) {
             return primaryUICHelper.getTeiPayloadWithOldPrimaryUIC(
               program,
@@ -457,11 +460,21 @@ async function getTeiWithPrimaryUIC(trackedEntityInstances, orgUnit, program) {
             dateOfBirth,
             implementingPartner
           );
-          attributes = [{ attribute: primaryUICMetadataId, value: primaryUIC }];
+          const filteredAttributes = [
+            { attribute: primaryUICMetadataId, value: primaryUIC },
+          ];
+
+          if (secondaryUIC && secondaryUIC !== "") {
+            filteredAttributes.push({
+              attribute: secondaryUICMetadataId,
+              value: secondaryUIC,
+            });
+          }
           return {
             trackedEntityInstance: tei.trackedEntityInstance || "",
             orgUnit: tei.orgUnit,
-            attributes,
+            relationships: tei.relationships,
+            attributes: filteredAttributes,
           };
         })
       )
