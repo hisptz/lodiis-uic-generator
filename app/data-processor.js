@@ -327,6 +327,8 @@ async function generateTrackedEntityInstancesUICs(
 ) {
   let newTei = {
     trackedEntityInstance: tei.trackedEntityInstance,
+    orgUnit: tei.orgUnit,
+    children: tei.children,
     attributes: _.filter(
       tei.attributes || [],
       (teiAttribute) =>
