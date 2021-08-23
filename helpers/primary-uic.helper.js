@@ -3,6 +3,7 @@ const constantsHelper = require("./constants.helper");
 const logsHelper = require("../helpers/logs.helper");
 const constants = constantsHelper.constants;
 const primaryUICMetadataId = constants.primaryUICMetadataId;
+const secondaryUICMetadataId = constants.secondaryUICMetadataId;
 const metadataConstants = constants.metadata;
 const programTypes = constants.programTypes;
 
@@ -110,7 +111,9 @@ function getTeiPayloadWithOldPrimaryUIC(program, tei) {
     ...tei,
     attributes: _.filter(
       tei.attributes || [],
-      (teiAttribute) => teiAttribute.attribute === primaryUICMetadataId
+      (teiAttribute) =>
+        teiAttribute.attribute === primaryUICMetadataId ||
+        teiAttribute.attribute === secondaryUICMetadataId
     ),
   };
   if (program) {
