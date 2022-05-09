@@ -1,9 +1,10 @@
 const sourceServer = {
-    url: '',
-    username: '',
-    password: '',
+  url: "",
+  username: "",
+  password: "",
+  emailsToNotify: "",
 };
 
 module.exports = {
-    sourceServer,
+  sourceServer,
 };
