@@ -1,8 +1,6 @@
 const dhis2Util = require("../helpers/dhis2-util.helper");
 const config = require("../config");
-const shell = require("shelljs");
 const serverUrl = config.sourceConfig.url;
-const emailsToNotify = config.sourceConfig.emailsToNotify;
 const dataExtractor = require("./data-extractor");
 const constantsHelper = require("../helpers/constants.helper");
 const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
@@ -14,6 +12,7 @@ const dataProcessor = require("./data-processor");
 const dataUploader = require("./data-uploader");
 const filesManipulationHelper = require("../helpers/file-manipulation.helper");
 const dirName = "files-folder";
+const emailNotificationHelper = require("../helpers/email-notification.helper");
 const constants = constantsHelper.constants;
 const appStatus = constants.appStatus;
 async function startApp(commands) {
@@ -193,9 +192,8 @@ async function startApp(commands) {
 
 function sendEmailWithScriptStatus() {
   const message = `The script has finished successfully. Find the summary attached below`;
-  shell.exec(
-    `echo "${message}" | s-nail -s 'KB UIC Script status' -a ../${dirName}/summary.xlsx ${emailsToNotify}`
-  );
+  const attachmentDir = `../${dirName}/summary.xlsx`;
+  emailNotificationHelper.sendEmailNotifications(message, attachmentDir);
 }
 
 module.exports = {
