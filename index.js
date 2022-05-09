@@ -1,12 +1,13 @@
-const app = require('./app');
-const dhis2Util = require('./helpers/dhis2-util.helper');
-const logsHelper = require('./helpers/logs.helper');
-const { updateProcessStatus } = require('./helpers/utils.helper');
-const commandsHelper = require('./helpers/commands.helper');
-const statusHelper = require('./helpers/status.helper');
-const config = require('./config');
+const app = require("./app");
+const dhis2Util = require("./helpers/dhis2-util.helper");
+const logsHelper = require("./helpers/logs.helper");
+const { updateProcessStatus } = require("./helpers/utils.helper");
+const commandsHelper = require("./helpers/commands.helper");
+const statusHelper = require("./helpers/status.helper");
+const config = require("./config");
 const serverUrl = config.sourceConfig.url;
-const constantsHelper = require('./helpers/constants.helper');
+const constantsHelper = require("./helpers/constants.helper");
+const emailNotificationHelper = require("./helpers/email-notification.helper");
 const constants = constantsHelper.constants;
 const appStatus = constants.appStatus;
 const commands = constants.commands;
@@ -19,11 +20,6 @@ async function start() {
       config.sourceConfig.username,
       config.sourceConfig.password
     );
-    await logsHelper.clearLogs();
-    await logsHelper.deleteLogsConfiguration(headers,serverUrl,[]);
-    updateProcessStatus('Starting script...');
-    await logsHelper.addLogs('INFO', `Start an app`, 'App');
-    await logsHelper.updateAppLogsConfiguration(headers, serverUrl,'INFO', `Start an app`, 'App');
 
     const parameters = process.argv;
     const verifiedCommands = await commandsHelper.getVerifiedCommands(
@@ -44,10 +40,10 @@ async function start() {
         serverUrl,
         verifiedCommands.statusOption
       );
-      await logsHelper.addLogs('INFO', `End an app`, 'App');
+      await logsHelper.addLogs("INFO", `End an app`, "App");
       return;
     } else if (!verifiedCommands || !verifiedCommands.action) {
-      await logsHelper.addLogs('INFO', `End an app`, 'App');
+      await logsHelper.addLogs("INFO", `End an app`, "App");
       return;
     }
 
@@ -58,7 +54,8 @@ async function start() {
 
     switch (appConfigStatus) {
       case appStatusOptions.started:
-        console.log('Setting new status');
+        console.log("Setting new status");
+        await restartLogs(headers, serverUrl);
         await statusHelper.updateAppStatusConfiguration(headers, serverUrl, {
           appStatus: appStatusOptions.running,
           timeStarted: new Date(),
@@ -66,7 +63,8 @@ async function start() {
         await app.startApp(verifiedCommands);
         break;
       case appStatusOptions.stopped:
-        console.log('Setting new status');
+        console.log("Setting new status");
+        await restartLogs(headers, serverUrl);
         await statusHelper.updateAppStatusConfiguration(headers, serverUrl, {
           appStatus: appStatusOptions.running,
           timeStarted: new Date(),
@@ -74,27 +72,51 @@ async function start() {
         await app.startApp(verifiedCommands);
         break;
       case appStatusOptions.running:
-        console.log(
-          'The application can not be run now, It is running in other platform'
+        emailNotificationHelper.sendEmailNotifications(
+          "This script could not be started because it is already running from the previous run"
         );
+        console.log("The application can not be run now, It is still running");
         break;
       case appStatusOptions.underMaintenance:
+        emailNotificationHelper.sendEmailNotifications(
+          "This script could not be started because it is under maintenance"
+        );
         console.log(
-          'The application is under maintenance please contact System administrator'
+          "The application is under maintenance please contact System administrator"
         );
         break;
       case appStatusOptions.unknown:
-        console.log('Failed to run application please try again later!');
+        console.log("Failed to run application please try again later!");
         break;
       default:
-        console.log('Failed to run application please try again later!');
+        console.log("Failed to run application please try again later!");
         break;
     }
 
     // await app.startApp(verifiedCommands);
   } catch (error) {
     console.log(error);
-    await logsHelper.addLogs('ERROR', error.message || error, 'App');
-    await logsHelper.updateAppLogsConfiguration(headers, serverUrl,'ERROR', error.message || error, 'App');
+    await logsHelper.addLogs("ERROR", error.message || error, "App");
+    await logsHelper.updateAppLogsConfiguration(
+      headers,
+      serverUrl,
+      "ERROR",
+      error.message || error,
+      "App"
+    );
+  }
+
+  async function restartLogs(headers, serverUrl) {
+    await logsHelper.clearLogs();
+    await logsHelper.deleteLogsConfiguration(headers, serverUrl, []);
+    updateProcessStatus("Starting script...");
+    await logsHelper.addLogs("INFO", `Start an app`, "App");
+    await logsHelper.updateAppLogsConfiguration(
+      headers,
+      serverUrl,
+      "INFO",
+      `Start an app`,
+      "App"
+    );
   }
 }

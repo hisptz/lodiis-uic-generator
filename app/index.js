@@ -12,6 +12,7 @@ const dataProcessor = require("./data-processor");
 const dataUploader = require("./data-uploader");
 const filesManipulationHelper = require("../helpers/file-manipulation.helper");
 const dirName = "files-folder";
+const emailNotificationHelper = require("../helpers/email-notification.helper");
 const constants = constantsHelper.constants;
 const appStatus = constants.appStatus;
 async function startApp(commands) {
@@ -177,6 +178,7 @@ async function startApp(commands) {
         `End an app`,
         "App"
       );
+      sendEmailWithScriptStatus();
     } else {
       await logsHelper.addLogs("INFO", "There is no Community Council present");
       console.log("There is no Community Council present");
@@ -187,6 +189,13 @@ async function startApp(commands) {
     await logsHelper.addLogs("ERROR", error.message || error, "startApp");
   }
 }
+
+function sendEmailWithScriptStatus() {
+  const message = `The script has finished successfully. Find the summary attached below`;
+  const attachmentDir = `../${dirName}/summary.xlsx`;
+  emailNotificationHelper.sendEmailNotifications(message, attachmentDir);
+}
+
 module.exports = {
   startApp,
 };
