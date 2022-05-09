@@ -1,6 +1,8 @@
 const dhis2Util = require("../helpers/dhis2-util.helper");
 const config = require("../config");
+const shell = require("shelljs");
 const serverUrl = config.sourceConfig.url;
+const emailsToNotify = config.sourceConfig.emailsToNotify;
 const dataExtractor = require("./data-extractor");
 const constantsHelper = require("../helpers/constants.helper");
 const levelForDataProcessing = constantsHelper.constants.orgUnitLevelThree;
@@ -177,6 +179,7 @@ async function startApp(commands) {
         `End an app`,
         "App"
       );
+      sendEmailWithScriptStatus();
     } else {
       await logsHelper.addLogs("INFO", "There is no Community Council present");
       console.log("There is no Community Council present");
@@ -187,6 +190,14 @@ async function startApp(commands) {
     await logsHelper.addLogs("ERROR", error.message || error, "startApp");
   }
 }
+
+function sendEmailWithScriptStatus() {
+  const message = `The script has finished successfully. Find the summary attached below`;
+  shell.exec(
+    `echo "${message}" | s-nail -s 'KB UIC Script status' -a ../${dirName}/summary.xlsx ${emailsToNotify}`
+  );
+}
+
 module.exports = {
   startApp,
 };
