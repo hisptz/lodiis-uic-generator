@@ -38,11 +38,6 @@ async function startApp(commands) {
         levelForDataProcessing
       );
 
-    // orgUnitsForDataProcessing = _.filter(
-    //   orgUnitsForDataProcessing || [],
-    //   (orgUnit) => orgUnit.id === "kS57XvyAT91"
-    // );
-
     if (orgUnitsForDataProcessing && orgUnitsForDataProcessing.length) {
       let summaries = [];
 
@@ -170,6 +165,10 @@ async function startApp(commands) {
         timeStopped: new Date(),
       });
 
+      console.log("Sending email notifications");
+      await logsHelper.addLogs("INFO", "Sending email notifications", "App");
+      sendEmailWithScriptStatus();
+
       await logsHelper.addLogs("INFO", `End an app`, "App");
       await logsHelper.updateAppLogsConfiguration(
         headers,
@@ -178,7 +177,6 @@ async function startApp(commands) {
         `End an app`,
         "App"
       );
-      sendEmailWithScriptStatus();
     } else {
       await logsHelper.addLogs("INFO", "There is no Community Council present");
       console.log("There is no Community Council present");
@@ -192,7 +190,7 @@ async function startApp(commands) {
 
 function sendEmailWithScriptStatus() {
   const message = `The script has finished successfully. Find the summary attached below`;
-  const attachmentDir = `../${dirName}/summary.xlsx`;
+  const attachmentDir = `${dirName}/summary.xlsx`;
   emailNotificationHelper.sendEmailNotifications(message, attachmentDir);
 }
 
