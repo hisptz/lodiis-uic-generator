@@ -31,7 +31,7 @@ async function startApp(commands) {
       "startApp"
     );
 
-    const orgUnitsForDataProcessing =
+    var orgUnitsForDataProcessing =
       await dataExtractor.getOrgUnitsForDataProcessing(
         headers,
         serverUrl,
@@ -167,7 +167,14 @@ async function startApp(commands) {
 
       console.log("Sending email notifications");
       await logsHelper.addLogs("INFO", "Sending email notifications", "App");
-      sendEmailWithScriptStatus();
+      await logsHelper.updateAppLogsConfiguration(
+        headers,
+        serverUrl,
+        "INFO",
+        "Sending email notifications",
+        "App"
+      );
+      await sendEmailWithScriptStatus();
 
       await logsHelper.addLogs("INFO", `End an app`, "App");
       await logsHelper.updateAppLogsConfiguration(
@@ -188,7 +195,7 @@ async function startApp(commands) {
   }
 }
 
-function sendEmailWithScriptStatus() {
+async function sendEmailWithScriptStatus() {
   const message = `The script has finished successfully. Find the summary attached below`;
   const attachmentDir = `${dirName}/summary.xlsx`;
   emailNotificationHelper.sendEmailNotifications(message, attachmentDir);
