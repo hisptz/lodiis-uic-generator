@@ -13,6 +13,7 @@ const dataUploader = require("./data-uploader");
 const filesManipulationHelper = require("../helpers/file-manipulation.helper");
 const dirName = "files-folder";
 const emailNotificationHelper = require("../helpers/email-notification.helper");
+const summaryHelper = require("../helpers/summary.helper");
 const constants = constantsHelper.constants;
 const appStatus = constants.appStatus;
 async function startApp(commands) {
@@ -146,9 +147,15 @@ async function startApp(commands) {
         "Generating summary...",
         "App"
       );
+      const sanitizedSummary =
+        summaryHelper.generateSanitizedSummary(summaries);
+      await filesManipulationHelper.writeToExcelFile(
+        sanitizedSummary,
+        `${dirName}/summary.xlsx`
+      );
       await filesManipulationHelper.writeToExcelFile(
         summaries,
-        `${dirName}/summary.xlsx`
+        `${dirName}/detailed-summary.xlsx`
       );
       console.log("Summary generated successfully");
       await logsHelper.addLogs("INFO", "Summary generated successfully", "App");
