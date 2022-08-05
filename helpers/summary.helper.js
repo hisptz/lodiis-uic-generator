@@ -1,7 +1,7 @@
 const _ = require("lodash");
 
 function generateSanitizedSummary(summaries) {
-  const sanitizedSummary = {};
+  var sanitizedSummary = {};
   const groupedSummaries = _.groupBy(summaries, "status");
   _.forIn(groupedSummaries, function (value, key) {
     sanitizedSummary = {
