@@ -1,16 +1,22 @@
 const _ = require("lodash");
 
 function generateSanitizedSummary(summaries) {
-  var sanitizedSummary = {};
+  var sanitizedSummary = [];
   const groupedSummaries = _.groupBy(summaries, "status");
   _.forIn(groupedSummaries, function (value, key) {
-    sanitizedSummary = {
+    sanitizedSummary = [
       ...sanitizedSummary,
-      [`${_.capitalize(key)}`]: value.length,
-    };
+      {
+        Status: _.capitalize(key),
+        Count: value.length,
+      },
+    ];
   });
 
-  sanitizedSummary = { ...sanitizedSummary, Total: summaries.length };
+  sanitizedSummary = [
+    ...sanitizedSummary,
+    { Status: "Total", Count: summaries.length },
+  ];
 
   return sanitizedSummary;
 }
