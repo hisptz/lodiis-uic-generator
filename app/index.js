@@ -14,6 +14,7 @@ const filesManipulationHelper = require("../helpers/file-manipulation.helper");
 const dirName = "files-folder";
 const emailNotificationHelper = require("../helpers/email-notification.helper");
 const summaryHelper = require("../helpers/summary.helper");
+const { filter } = require("lodash");
 const constants = constantsHelper.constants;
 const appStatus = constants.appStatus;
 async function startApp(commands) {
@@ -203,7 +204,7 @@ async function startApp(commands) {
 }
 
 async function sendEmailWithScriptStatus() {
-  const message = `The script has finished successfully. Find the summary attached below`;
+  const message = `The script has finished successfully. Find the attached summary.`;
   const attachmentDir = `${dirName}/summary.xlsx`;
   emailNotificationHelper.sendEmailNotifications(message, attachmentDir);
 }

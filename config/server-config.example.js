@@ -5,6 +5,12 @@ const sourceServer = {
   emailsToNotify: "",
 };
 
+// Gmail
+const emailSender = {
+  email: "",
+  password: "",
+};
+
 module.exports = {
   sourceServer,
 };
