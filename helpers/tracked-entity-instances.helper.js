@@ -159,12 +159,7 @@ async function separateTeiParentFromChildren(trackedEntityInstances) {
     });
 
     childrenTeiPayloads = _.map(childrenTeiPayloads, (childPayload) => {
-      return _.omit(childPayload, [
-        "relationships",
-        "hasOldPrimaryUIC",
-        "created",
-        "enrollments",
-      ]);
+      return _.omit(childPayload, ["relationships", "created", "enrollments"]);
     });
 
     return childrenTeiPayloads.concat(parentTeiPayloads);

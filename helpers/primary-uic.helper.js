@@ -117,11 +117,13 @@ function getTeiPayloadWithOldPrimaryUIC(program, tei) {
     ),
   };
   if (program) {
-    if (program.type === programTypes.dreams) {
-      return [];
-    } else if (program.type === programTypes.caregiver) {
-      return { ...sanitizedTei, hasOldPrimaryUIC: true };
-    } else if (program.type === programTypes.ovc) {
+    if (
+      [
+        programTypes.caregiver,
+        programTypes.dreams,
+        program.type === programTypes.ovc,
+      ].includes(program.type)
+    ) {
       return { ...sanitizedTei, hasOldPrimaryUIC: true };
     } else {
       return [];
