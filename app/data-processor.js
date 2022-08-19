@@ -139,7 +139,10 @@ async function getFormattedTEIPayloadByProgramWithUIC(
     );
   }
 
-  return payloads;
+  return _.filter(payloads, (payload) => {
+    const { hasOldPrimaryUIC } = payload;
+    return !hasOldPrimaryUIC;
+  });
 }
 async function getParentWithChildrenFormattedPayloads(
   orgUnitTeiObj,
