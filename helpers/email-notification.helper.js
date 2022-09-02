@@ -1,22 +1,22 @@
 const config = require("../config");
 const nodemailer = require("nodemailer");
 
-const emailsToNotify = config.sourceConfig.emailsToNotify ?? "";
+const emailsToNotify = config.sourceConfig.emailsToNotify || "";
 const emailSender = config.emailSender;
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     type: "login",
-    user: emailSender.email ?? "",
-    pass: emailSender.password ?? "",
+    user: emailSender.email || "",
+    pass: emailSender.password || "",
   },
 });
 
 function sendEmailNotifications(message, attachmentDir) {
   try {
     const mailOptions = {
-      from: emailSender.email ?? "",
+      from: emailSender.email || "",
       to: emailsToNotify,
       subject: "KB UIC SCRIPT STATUS",
       text: message,
