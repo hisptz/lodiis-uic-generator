@@ -2,6 +2,7 @@ const config = require("../config");
 const nodemailer = require("nodemailer");
 
 const emailsToNotify = config.sourceConfig.emailsToNotify || "";
+const serverUrl = config.sourceConfig.url || "";
 const emailSender = config.emailSender;
 
 const transporter = nodemailer.createTransport({
@@ -14,11 +15,19 @@ const transporter = nodemailer.createTransport({
 });
 
 function sendEmailNotifications(message, attachmentDir) {
+  const instanceName =
+    serverUrl && serverUrl.length > 0
+      ? serverUrl.includes("testing")
+        ? "- TESTING INSTANCE"
+        : serverUrl.includes("training")
+        ? "- TRAINING INSTANCE"
+        : "- LIVE INSTANCE"
+      : "";
   try {
     const mailOptions = {
       from: emailSender.email || "",
       to: emailsToNotify,
-      subject: "KB UIC SCRIPT STATUS",
+      subject: `KB UIC SCRIPT STATUS ${instanceName}`.trim(),
       text: message,
       attachments: attachmentDir
         ? [
