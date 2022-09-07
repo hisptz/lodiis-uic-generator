@@ -73,13 +73,13 @@ async function start() {
         break;
       case appStatusOptions.running:
         emailNotificationHelper.sendEmailNotifications(
-          "This script could not be started because it is already running from the previous run"
+          "This script could not be started because it is already running from the previous run."
         );
         console.log("The application can not be run now, It is still running");
         break;
       case appStatusOptions.underMaintenance:
         emailNotificationHelper.sendEmailNotifications(
-          "This script could not be started because it is under maintenance"
+          "This script could not be started because it is under maintenance."
         );
         console.log(
           "The application is under maintenance please contact System administrator"
