@@ -23,7 +23,6 @@ async function startApp(commands) {
     config.sourceConfig.password
   );
   try {
-    // Get all org units require to retrieve data from programs
     await logsHelper.addLogs("INFO", "Fetching Community Councils", "startApp");
     await logsHelper.updateAppLogsConfiguration(
       headers,
