@@ -82,22 +82,65 @@ const requestResponse = {
   },
 };
 
+const implementingPartners = [
+  {
+    code: "Super user",
+    value: "",
+  },
+  {
+    code: "PSI",
+    value: "PSI",
+  },
+  {
+    code: "EGPAF",
+    value: "EGPAF",
+  },
+  {
+    code: "KB-Case Management",
+    value: "KB",
+  },
+  {
+    code: "Paralegal",
+    value: "KB",
+  },
+  {
+    code: "KB-AGYW/DREAMS",
+    value: "KB",
+  },
+  {
+    code: "EDUCATION",
+    value: "KB",
+  },
+  {
+    code: "CLO",
+    value: "CLO",
+  },
+  {
+    code: "CoHIP SEC",
+    value: "CoHIP",
+  },
+  {
+    code: "M2M",
+    value: "M2M",
+  },
+];
+
 const constants = {
-  orgUnitLevelThree: 3,
-  programs: programs,
-  programTypes: programTypes,
+  ageMetadataId: "ls9hlz2tyol",
   primaryUICMetadataId: "fTSAY18LgCF",
   secondaryUICMetadataId: "eIU7KMx4Tu3",
   implementingPartnerMetadataId: "klLkGxy328c",
   dateOfBirthMetadataId: "qZP982qpSPS",
-  metadata: metadata,
-  requestResponse: requestResponse,
-  commands: commands,
-  ageMetadataId: "ls9hlz2tyol",
-  appStatus: appStatus,
+  orgUnitLevelThree: 3,
+  programs,
+  programTypes,
+  metadata,
+  requestResponse,
+  commands,
+  appStatus,
+  implementingPartners,
 };
 
 module.exports = {
   constants,
-  programTypes,
 };
