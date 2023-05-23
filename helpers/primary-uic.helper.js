@@ -46,7 +46,6 @@ function addZerosToANumber(number) {
   return number;
 }
 function getImplementingPartnerString(implementingPartner) {
-  // TODO add mapping for implementing partners
   const implementingPartnerCode = _.find(
     implementingPartners,
     ({ code }) => code === implementingPartner
