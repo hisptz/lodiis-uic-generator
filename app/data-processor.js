@@ -1,12 +1,3 @@
-const constantsHelper = require("../helpers/constants.helper");
-const constants = constantsHelper.constants;
-const primaryUICMetadataId = constants.primaryUICMetadataId;
-const secondaryUICMetadataId = constants.secondaryUICMetadataId;
-const dateOfBirthMetadataId = constants.dateOfBirthMetadataId;
-const implementingPartnerMetadataId = constants.implementingPartnerMetadataId;
-const programs = constants.programs;
-const programTypes = constants.programTypes;
-const metadataConstants = constants.metadata;
 const teiHelper = require("../helpers/tracked-entity-instances.helper");
 const orgUnitHelper = require("../helpers/organisational-units.helper");
 const secondaryUICHelper = require("../helpers/secondary-uic.helper");
@@ -14,6 +5,17 @@ const primaryUICHelper = require("../helpers/primary-uic.helper");
 const utilsHelper = require("../helpers/utils.helper");
 const _ = require("lodash");
 const logsHelper = require("../helpers/logs.helper");
+const constantsHelper = require("../helpers/constants.helper");
+const constants = constantsHelper.constants;
+const {
+  primaryUICMetadataId,
+  metadata: metadataConstants,
+  programs,
+  programTypes,
+  implementingPartnerMetadataId,
+  secondaryUICMetadataId,
+  dateOfBirthMetadataId,
+} = constants;
 
 async function getTrackedEntityPayloadsByOrgUnit(
   headers,
@@ -82,7 +84,6 @@ async function getTrackedEntityInstances(
 ) {
   const orgUnitId = orgUnit && orgUnit.id ? orgUnit.id : "";
   const programId = program && program.id ? program.id : "";
-  // const childProgramId = program && program.childProgram ? program.childProgram : '';
   let allTrackedEntityInstances = [];
   if (programId && orgUnitId) {
     const trackedEntityInstances =

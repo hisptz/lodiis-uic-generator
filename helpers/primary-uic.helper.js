@@ -1,11 +1,14 @@
 const _ = require("lodash");
 const constantsHelper = require("./constants.helper");
 const logsHelper = require("../helpers/logs.helper");
-const constants = constantsHelper.constants;
-const primaryUICMetadataId = constants.primaryUICMetadataId;
-const secondaryUICMetadataId = constants.secondaryUICMetadataId;
-const metadataConstants = constants.metadata;
-const programTypes = constants.programTypes;
+const { programTypes } = require("../config/metadata-config");
+const { constants } = constantsHelper;
+const {
+  primaryUICMetadataId,
+  secondaryUICMetadataId,
+  metadata: metadataConstants,
+  implementingPartners,
+} = constants;
 
 async function getPrimaryUIC(
   ancestorOrgUnit,
@@ -43,7 +46,13 @@ function addZerosToANumber(number) {
   return number;
 }
 function getImplementingPartnerString(implementingPartner) {
-  return _.snakeCase(implementingPartner).split("_")[0].toLocaleUpperCase();
+  const implementingPartnerCode = _.find(
+    implementingPartners,
+    ({ code }) => code === implementingPartner
+  );
+  return implementingPartnerCode
+    ? implementingPartnerCode.value
+    : _.snakeCase(implementingPartner).split("_")[0].toLocaleUpperCase();
 }
 
 async function getDoubleDigitNumber(number) {
