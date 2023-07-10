@@ -26,7 +26,6 @@
     4.2. [Auto](#Auto)
     4.3. [Update status](#Update)
 
-
 ## 1. <a name='Introduction'></a>Introduction
 
 Node script app for generating Unique Identifier Code(UIC) for AGYW, Caregiver and OVC in KB Lesotho instance.
@@ -53,11 +52,11 @@ npm install
 
 ### 3.2. <a name='Configuration'></a>Configuration
 
-There are two configurations to be done for the smooth generation of UICs for the benefeciaries in KB Lesotho DHIS2 instance, which are app and metadata configurations. 
+There are two configurations to be done for the smooth generation of UICs for the benefeciaries in KB Lesotho DHIS2 instance, which are app and metadata configurations.
 
 #### 3.2.1. <a name='Appconfiguration'></a>App configuration
 
-It includes configurations for connection between script to  DHIS2 instance. This configuration is in _config_ directory, create file and save as _server-config.js_ , its contents as in _server-config.example.js_ file within _config_ directory. See below sample
+It includes configurations for connection between script to DHIS2 instance. This configuration is in _config_ directory, create file and save as _server-config.js_ , its contents as in _server-config.example.js_ file within _config_ directory. See below sample
 
 ```
 const sourceServer = {
@@ -75,55 +74,68 @@ module.exports = {
 
 It includes configuration to set metadata ids for the fields and programs which are required. This configuration is in _config_ directory, create file and save as _metadata-config.js_ , its contents as in _metadata-config.example.js_ file within _config_ directory. See below sample
 
-
 ```
+const programTypes = {
+  caregiver: "CG",
+  ovc: "OVC",
+  dreams: "DRM",
+  bursary: "BUR",
+  lbse: "LB",
+};
+
 const metadata = {
-    firstname: 'firstname_metadata_id',
-    surname: 'surname_metadata_id',
-    primaryUIC: 'primaryUIC_metadata_id',
-    secondaryUIC: 'secondaryUIC_metadata_id',
-      age: 'age_metadata_id',
-  };
-   const programs = [
-    {
-      id: 'program_id', // Example: Caregiver
-      childProgram: {
-        id: 'id_of_program_with_child_with_this_program', //Example: ovc
-        type: 'type_of_child_program',
-      },
-      type: 'type_of_program',
-    },
-    {
-      id: 'program_id',
-      type: 'type_of_program',
-      isChild: 'true_if_it_is_child_and_false_if_not',
-    },
-    {
-      id: 'program_id',
-      type: 'type_of_program',
-    },
-  ];
+  firstname: "<firstname_metadata_id>",
+  surname: "<surname_metadata_id>",
+  primaryUIC: "<primaryUIC_metadata_id>",
+  secondaryUIC: "<secondaryUIC_metadata_id>",
+  age: "<age_metadata_id>",
+};
 
-  module.exports = {
-    metadata,
-    programs
-}
+const programs = [
+  {
+    id: "<program-id>",
+    type: "<program-type-as-referred-above>", // programTypes.bursary,
+    isChild: "<true_if_it_is_child_and_false_if_not>",
+  },
+  {
+    id: "<program-id>",
+    childProgram: {
+      id: "<id_of_program_with_child_with_this_program>", //Example: ovc
+      type: "<type_of_child_program>", // programTypes.ovc,
+    },
+    type: "<type_of_program>", // programTypes.caregiver,
+  },
+  {
+    id: "<program-id>",
+    type: "<type_of_program>", // programTypes.ovc,
+    isChild: "<true_if_it_is_child_and_false_if_not>",
+  },
+];
+
+module.exports = {
+  metadata,
+  programs,
+  programTypes,
+};
+
+module.exports = {
+  metadata,
+  programs,
+};
 
 ```
-
 
 ##### Source programs
-In order for a script to run it needs ids for the program required to generate UICs for it tracked entity instances. 
 
+In order for a script to run it needs ids for the program required to generate UICs for it tracked entity instances.
 
 ## 4. <a name='Operationsofscript'></a>Operations of script
 
 Once all configuration has been done, we can start using the script. There are several command for generation of UICs. They can be achieved using _run-app.sh_ . But we recommend to use [screen](https://linuxize.com/post/how-to-use-linux-screen/) to do manual data upload as it takes time complete based on volume of data. There are three types of actions Generate, auto and update
 
-
 ### 4.1. <a name='Generate'></a>Generate
 
-UICs can be generated for all beneficiaries without UICs or by specific dates of beneficiaries updated. All of these can be specified in a comaand. 
+UICs can be generated for all beneficiaries without UICs or by specific dates of beneficiaries updated. All of these can be specified in a comaand.
 
 #### 4.1.1. <a name='GenerateForAllUICs'></a>Generate for all available data in programs
 
@@ -132,6 +144,7 @@ Within script directory run command below
 ```
 ./run-app.sh generate
 ```
+
 or
 
 ```
@@ -145,51 +158,59 @@ Within script directory run command below
 ```
 ./run-app.sh generate from [START_DATE(YYYY-MM-DD)] to [END_DATE(YYYY-MM-DD)]
 ```
+
 or
 
 ```
 node index.js generate from [START_DATE(YYYY-MM-DD)] to [END_DATE(YYYY-MM-DD)]
 ```
+
 ###### Example
 
 ```
 ./run-app.sh generate from 2021-01-21 to 2021-02-10
 ```
+
 or
 
 ```
 node index.js generate from 2021-01-21 to 2021-02-10
 ```
-This command will generate UICs for all beneficiaries who have been updated from **2021-01-21 to  2021-02-10**
+
+This command will generate UICs for all beneficiaries who have been updated from **2021-01-21 to 2021-02-10**
 
 ### 4.2. <a name='Auto'></a>Auto
 
-When you specify *auto* action in a command the command will generate UICs for data in a week period.
+When you specify _auto_ action in a command the command will generate UICs for data in a week period.
 
 ###### Example
 
 ```
 ./run-app.sh generate auto
 ```
+
 or
 
 ```
 node index.js generate auto
 ```
+
 This command will generate UICs for all beneficiaries who have been updated from **in a week period**
+
 ### 4.3. <a name='Update'></a>Update Status
 
-Status of the script can be updated using update action. When you specify *update* action in a command you should also specify word *status* and type of status. This action is useful when the script has been terminated manually, so this action can be run to update status manually.
+Status of the script can be updated using update action. When you specify _update_ action in a command you should also specify word _status_ and type of status. This action is useful when the script has been terminated manually, so this action can be run to update status manually.
 Available statuses are:
-Status        | Desciption
+Status | Desciption
 ------------- | -------------
-STOPPED       | Script has been stopped
-RUNNING       | Script is running
-UNDER_MAINTENANCE       | Script is under maintenance
+STOPPED | Script has been stopped
+RUNNING | Script is running
+UNDER_MAINTENANCE | Script is under maintenance
 
 ```
 ./run-app.sh update status [STATUS]
 ```
+
 or
 
 ```
@@ -201,10 +222,11 @@ node index.js update status [STATUS]
 ```
 ./run-app.sh update status STOPPED
 ```
+
 or
 
 ```
 node index.js update status STOPPED
 ```
-This command will update status of the script to **STOPPED**
 
+This command will update status of the script to **STOPPED**
