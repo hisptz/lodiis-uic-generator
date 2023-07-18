@@ -1,6 +1,6 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
-# KB UIC GENERATOR
+# LODIIS UIC GENERATOR
 
 1.  [Introduction](#Introduction)
 
@@ -45,8 +45,8 @@ Node script app for generating Unique Identifier Code(UIC) for AGYW, Caregiver a
 Clone the app and install all app dependencies
 
 ```
-git clone https://github.com/hisptz/kb-uic-generator.git
-cd kb-uic-generator
+git clone https://github.com/hisptz/lodiis-uic-generator.git
+cd lodiis-uic-generator
 npm install
 ```
 
