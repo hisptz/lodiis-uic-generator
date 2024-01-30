@@ -118,11 +118,6 @@ module.exports = {
   programTypes,
 };
 
-module.exports = {
-  metadata,
-  programs,
-};
-
 ```
 
 ##### Source programs

@@ -40,8 +40,3 @@ module.exports = {
   programs,
   programTypes,
 };
-
-module.exports = {
-  metadata,
-  programs,
-};
