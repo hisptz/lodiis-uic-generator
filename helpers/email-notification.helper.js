@@ -15,19 +15,12 @@ const transporter = nodemailer.createTransport({
 });
 
 function sendEmailNotifications(message, attachmentDir) {
-  const instanceName =
-    serverUrl && serverUrl.length > 0
-      ? serverUrl.includes("testing")
-        ? "- TESTING INSTANCE"
-        : serverUrl.includes("training")
-        ? "- TRAINING INSTANCE"
-        : "- LIVE INSTANCE"
-      : "";
+  const instanceName = serverUrl;
   try {
     const mailOptions = {
       from: emailSender.email || "",
       to: emailsToNotify,
-      subject: `KB UIC SCRIPT STATUS ${instanceName}`.trim(),
+      subject: `KB UIC SCRIPT STATUS - ${instanceName}`.trim(),
       text: message,
       attachments: attachmentDir
         ? [
